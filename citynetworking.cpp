@@ -215,7 +215,6 @@ int Graph::kruskalMST() {
 	//Sorts the edges nondecrescent by weight, prioritazing roads.
 	sort(edgeVector.begin(), edgeVector.end(), edgeWeightComparator);
 	printEdgeList(); //Debug.
-	int mst_wt = 0;
 	for (vector<Edge>::const_iterator it = edgeVector.begin(); it != edgeVector.end(); it++) {
 		int u = (*it).first.first;
 		int v = (*it).first.second;
@@ -223,13 +222,18 @@ int Graph::kruskalMST() {
 		int set_v = ds.find(v);
 		if (set_u != set_v) {
 			cout << u << " - " << v << endl;
-			mst_wt += (*it).second;
+			if (v == skyCity) {
+				networkAirports++;
+			}
+			else {
+				networkRoads++;
+			}
+			networkCost += (*it).second;
 			ds.merge(set_u, set_v);
 		}
 	}
-	networkCost = mst_wt;
 	answerFormat();
-	return mst_wt;
+	return networkCost;
 }
 //Checks the MST for the required values;
 void Graph::answerFormat() {
