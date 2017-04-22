@@ -29,18 +29,9 @@ using std::pair;
 
 ------------------------------------------------------------------------------*/
 /*
-Input variables.
-	int:mc 						number of graphVertices to connect (vertices).
-	int:ma 						maximum number of networkMaxAirports allowed in the network.
-	int:mr 						maximum number of networkMaxRoads allowed in the network.
-	int:a, int:b				graphVertices.
-	int:c 						cost of building an airport on city a or a road between a and b.
-*/
-int mc, ma, mr, a, b, c;
-/*
 Output variables.
 	int:networkCost				total weight of the MST - "Minimum cost of connecting all graphVertices".
-	int:networkRoads 			number of networkMaxRoads used.
+	int:networkRoads			number of networkMaxRoads used.
 	int:networkAirports 		number of networkMaxAirports used.
 */
 int networkCost = 0;
@@ -85,28 +76,28 @@ public:
 		return skyCity;
 	}
 
-	int getCities() {
+	int getNumberVertices() {
 		return graphVertices;
 	}
 
-	int getAiports() {
+	int getMaxAirports() {
 		return networkMaxAirports;
 	}
 
-	int getRoads() {
+	int getMaxRoads() {
 		return networkMaxRoads;
 	}
 
-	void setCities(int c) {
-		graphVertices = c;
+	void setNumberVertices(int i) {
+		graphVertices = i;
 	}
 
-	void setAirports(int a) {
-		networkMaxAirports = a;
+	void setMaxAirports(int i) {
+		networkMaxAirports = i;
 	}
 
-	void setRoads(int r) {
-		networkMaxRoads = r;
+	void setMaxRoads(int i) {
+		networkMaxRoads = i;
 	}
 
 	void addEdge(Edge e) {
@@ -119,48 +110,46 @@ public:
 		return e;
 	}
 
-	/* Calculates the MST for this graph, generating the desired network */
+	//Calculates the MST for this graph, generating the desired network.
 	void kruskalMST();
-
-
 };
 
 void Graph::kruskalMST() {
-  // TODO
+	//TODO - @RafaelRibeiro
 }
 
-/* Application that calculates the MST */
+//Application that calculates the MST.
 int main() {
-  /* int iterator */
 	int i;
-  /* edge auxiliar */
-	Edge e;
-  /* Instanciate new graph with default constructor */
-	Graph graph;
+	/*
+	Input variables.
+		int scanfAux		variable to fetch the numbers.
+		int:a, int:b		graphVertices.
+		int:c				cost of building an airport on city a or a road between a and b.
+	*/
+	int scanfAux, a, b, c;
+	Edge e; //Edge (auxiliar).
+	Graph graph; //Instanciate new graph with default constructor.
 
-  /* Reading inputs from standart input, given by user */
+	/*----------------------------------------------------------------------------
 
-  /* Gets amount of graphVertices to connect */
-	scanf("%d", &mc);
-	graph.setCities(mc);
+			Creation of the Graph
 
-  /* Gets maximum amount of networkMaxAirports */
-	scanf("%d", &ma);
-	graph.setAirports(ma);
-
-  /* Creates all airways */
-	for (i = 0; i < ma; i++) {
+	----------------------------------------------------------------------------*/
+	scanf("%d", &scanfAux); //Gets the number of vertices (graphVertices) to connect.
+	graph.setNumberVertices(scanfAux);
+	
+	scanf("%d", &scanfAux); //Gets the max number of airports (networkMaxAirports).
+	graph.setMaxAirports(scanfAux);
+	for (i = 0; i < scanfAux; i++) { //Creates all the airways.
 		scanf("%d %d", &a, &c);
 		e = graph.newEdge(a, graph.getSky(), c);
 		graph.addEdge(e);
 	}
-
-  /* Gets maximum amount of networkMaxRoads */
-	scanf("%d", &mr);
-	graph.setRoads(mr);
-
-  /* Creates all networkMaxRoads */
-	for (i = 0; i < mr; i++) {
+	
+	scanf("%d", &scanfAux); //Gets the max number of roads (networkMaxRoads).
+	graph.setMaxRoads(scanfAux);
+	for (i = 0; i < scanfAux; i++) { //Creates all the roads.
 		scanf("%d %d %d", &a, &b, &c);
 		e = graph.newEdge(a, b, c);
 		graph.addEdge(e);
