@@ -18,106 +18,109 @@ using namespace std;
 using std::pair;
 
 /*------------------------------------------------------------------------------
-//	STRUCTS
-------------------------------------------------------------------------------*/
 
-/* Connection represents a road or airway from city int:a to city int:b */
-typedef pair<int, int> Connection;
-/* Edge is a pair whose elements are a connection and the respective int:cost */
-typedef pair<Connection, int> Edge;
-/* Network is a */
+			CONSTANTS
 
-/*------------------------------------------------------------------------------
-//	CONSTANTS
 ------------------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------------------
-//	GLOBAL VARIABLES
-------------------------------------------------------------------------------*/
+			
+			GLOBAL VARIABLES
 
+------------------------------------------------------------------------------*/
 /*
-* Output variables.
-* networkCost is the total weight of the MST - "Cost of connecting all cities".
-* networkRoads is the int: value of roads used for the calculated network.
-* networkAirports is the int: value of airports used for the calculated network.
+Input variables.
+	int:mc 						number of graphVertices to connect (vertices).
+	int:ma 						maximum number of networkMaxAirports allowed in the network.
+	int:mr 						maximum number of networkMaxRoads allowed in the network.
+	int:a, int:b				graphVertices.
+	int:c 						cost of building an airport on city a or a road between a and b.
+*/
+int mc, ma, mr, a, b, c;
+/*
+Output variables.
+	int:networkCost				total weight of the MST - "Minimum cost of connecting all graphVertices".
+	int:networkRoads 			number of networkMaxRoads used.
+	int:networkAirports 		number of networkMaxAirports used.
 */
 int networkCost = 0;
 int networkRoads = 0;
 int networkAirports = 0;
 
-/*
-* Input variables.
-* mc is the number of cities to connect. (vertices)
-* ma is the maximum amount of airports allowed in the network.
-* mr is the maximum amount of roads allowed in the network.
-* a and b represent cities.
-* c is the cost of building an airport on city a or a road between a and b.
-*/
-int mc, ma, mr, a, b, c;
 
+/*------------------------------------------------------------------------------
+
+			STRUCTS
+
+------------------------------------------------------------------------------*/
+//Connection represents a road or airway from city int:a to city int:b.
+typedef pair<int, int> Connection;
+//Edge is the pair of elements that make a connection and the respective int:cost.
+typedef pair<Connection, int> Edge;
+//Graph
 class Graph {
-  private:
-    /* Abstract city to which all cities with airports connect */
-    int skyCity;
-    /* Number of vertices in the graph, that is to be turned into an MST */
-    int cities;
-    /* Total number of allowed airports in the graph */
-    int airports;
-    /* Total number of allowed roads in the graph */
-    int roads;
-    /* Listing of all concrete edges in the graph, edge = <connection, cost> */
-    list<Edge> edgeList;
+private:
+	//Abstract city to which all graphVertices with networkMaxAirports connect.
+	int skyCity;
+	//Number of vertices in the graph, that is to be turned into an MST.
+	int graphVertices;
+	//Total number of allowed networkMaxAirports in the graph.
+	int networkMaxAirports;
+	//Total number of allowed networkMaxRoads in the graph.
+	int networkMaxRoads;
+	//Listing of all concrete edges in the graph, edge = <connection, cost>.
+	list<Edge> edgeList;
 
-  public:
-    Graph() {
-        this->skyCity = -1;
-        this->cities = 0;
-        this->airports = 0;
-        this->roads = 0;
-    }
+public:
+	Graph() {
+		this->skyCity = -1;
+		this->graphVertices = 0;
+		this->networkMaxAirports = 0;
+		this->networkMaxRoads = 0;
+	}
 
-    ~Graph() {}
+	~Graph() {}
 
-    int getSky() {
-      return skyCity;
-    }
+	int getSky() {
+		return skyCity;
+	}
 
-    int getCities() {
-      return cities;
-    }
+	int getCities() {
+		return graphVertices;
+	}
 
-    int getAiports() {
-      return airports;
-    }
+	int getAiports() {
+		return networkMaxAirports;
+	}
 
-    int getRoads() {
-      return roads;
-    }
+	int getRoads() {
+		return networkMaxRoads;
+	}
 
-    void setCities(int c) {
-      cities = c;
-    }
+	void setCities(int c) {
+		graphVertices = c;
+	}
 
-    void setAirports(int a) {
-      airports = a;
-    }
+	void setAirports(int a) {
+		networkMaxAirports = a;
+	}
 
-    void setRoads(int r) {
-      roads = r;
-    }
+	void setRoads(int r) {
+		networkMaxRoads = r;
+	}
 
-    void addEdge(Edge e) {
-      edgeList.push_back(e);
-    }
+	void addEdge(Edge e) {
+		edgeList.push_back(e);
+	}
 
-    Edge newEdge(int a, int b, int c) {
-      Connection con = make_pair(a, b);
-      Edge e = make_pair(con, c);
-      return e;
-    }
+	Edge newEdge(int a, int b, int c) {
+		Connection con = make_pair(a, b);
+		Edge e = make_pair(con, c);
+		return e;
+	}
 
-    /* Calculates the MST for this graph, generating the desired network */
-    void kruskalMST();
+	/* Calculates the MST for this graph, generating the desired network */
+	void kruskalMST();
 
 
 };
@@ -129,38 +132,38 @@ void Graph::kruskalMST() {
 /* Application that calculates the MST */
 int main() {
   /* int iterator */
-  int i;
+	int i;
   /* edge auxiliar */
-  Edge e;
+	Edge e;
   /* Instanciate new graph with default constructor */
-  Graph graph;
+	Graph graph;
 
   /* Reading inputs from standart input, given by user */
 
-  /* Gets amount of cities to connect */
-  scanf("%d", &mc);
-  graph.setCities(mc);
+  /* Gets amount of graphVertices to connect */
+	scanf("%d", &mc);
+	graph.setCities(mc);
 
-  /* Gets maximum amount of airports */
-  scanf("%d", &ma);
-  graph.setAirports(ma);
+  /* Gets maximum amount of networkMaxAirports */
+	scanf("%d", &ma);
+	graph.setAirports(ma);
 
   /* Creates all airways */
-  for (i = 0; i < ma; i++) {
-    scanf("%d %d", &a, &c);
-    e = graph.newEdge(a, graph.getSky(), c);
-    graph.addEdge(e);
-  }
+	for (i = 0; i < ma; i++) {
+		scanf("%d %d", &a, &c);
+		e = graph.newEdge(a, graph.getSky(), c);
+		graph.addEdge(e);
+	}
 
-  /* Gets maximum amount of roads */
-  scanf("%d", &mr);
-  graph.setRoads(mr);
+  /* Gets maximum amount of networkMaxRoads */
+	scanf("%d", &mr);
+	graph.setRoads(mr);
 
-  /* Creates all roads */
-  for (i = 0; i < mr; i++) {
-    scanf("%d %d %d", &a, &b, &c);
-    e = graph.newEdge(a, b, c);
-    graph.addEdge(e);
-  }
+  /* Creates all networkMaxRoads */
+	for (i = 0; i < mr; i++) {
+		scanf("%d %d %d", &a, &b, &c);
+		e = graph.newEdge(a, b, c);
+		graph.addEdge(e);
+	}
 
 }
