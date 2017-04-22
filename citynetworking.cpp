@@ -12,7 +12,6 @@
 #include <list>
 #include <string>
 #include <algorithm>
-#include <vector>
 #include <utility>
 
 /*------------------------------------------------------------------------------
@@ -146,6 +145,7 @@ int main() {
 
   /* Gets maximum amount of roads */
   scanf(%d, &mr);
+  graph.setRoads(mr);
 
   /* Creates all roads */
   for (i = 0; i < mr; i++) {
