@@ -15,20 +15,22 @@
 #include <algorithm>
 #include <utility>
 
-using namespace std;
-using std::pair;
-
 /*------------------------------------------------------------------------------
 
 			CONSTANTS
 
 ------------------------------------------------------------------------------*/
 
+using namespace std;
+using std::pair;
+
 /*------------------------------------------------------------------------------
 
 			GLOBAL VARIABLES
 
 ------------------------------------------------------------------------------*/
+
+int _skyCity;
 
 /**
 * Output variables.
@@ -51,21 +53,50 @@ typedef pair<int, int> Connection;
 //Edge is the pair of elements whose elements are a connection and the respective int:cost.
 typedef pair<Connection, int> Edge;
 
-
 /*------------------------------------------------------------------------------
 
 			AUXILIAR FUNCTIONS
 
 ------------------------------------------------------------------------------*/
-//Comparator used for sorting the vector of concrete edges with vector::sort
-bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
-	if (edge.second < anotherEdge.second) {
+/**
+* Auxiliar boolean function used on edgeWeightComparator for vector::sort
+* Returns true if and only if edge is not an airway and anotherEdge is.
+*/
+bool airwayComparator(Edge edge, Edge anotherEdge) {
+	// Obtains the connection of each ege with first, then gets cityB in that pair
+	int a = edge.first.second;
+	int b = anotherEdge.first.second;
+	// Checks if cityB from edge is not an airway and cityB from anotherEdge is.
+	if (a != _skyCity && b == _skyCity)
 		return true;
-	} 
-	else {
+	// If both conditions aren't met, return false.
+	else
 		return false;
-	}
 }
+
+/**
+* Comparator used for sorting the vector of concrete edges with vector::sort
+* Returns true (sort) if:
+* Edge is lighter then anotherEdge
+* Edges have the same weight but Edge isnt an airway and anotherEdge is.
+* Returns false (dont sort) if:
+* Edge is heavier than anotherEdge;
+* Edges have same weight and both are airways;
+* Edges have same weight, Edge is an airway but anotherEdge isnt;
+*/
+bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
+	if (edge.second < anotherEdge.second)
+    return true;
+  else if (edge.second == anotherEdge.second) {
+		if (airwayComparator(edge, anotherEdge)) {
+			return true;
+		}
+ 	}
+	else
+  	return false;
+}
+
+
 
 //Prints the output in case of impossibility of creating a proper network.
 void outputInsuficient() { cout << "Insuficiente" << endl; }
@@ -81,7 +112,7 @@ void outputInsuficient() { cout << "Insuficiente" << endl; }
 struct DisjointSets {
 	int *parent, *rnk;
 	int n;
-	
+
 	DisjointSets(int vert) {
 		this->n = vert + 1;
 		rnk = new int[vert + 1];
@@ -127,7 +158,7 @@ private:
 	vector<Edge> edgeVector;
 public:
 	Graph() {
-		this->skyCity = -1;
+		this->skyCity;
 		this->graphVertices = 0;
 		this->networkMaxAirports = 0;
 		this->networkMaxRoads = 0;
@@ -233,6 +264,7 @@ int main() {
 	/* Creation of the Graph */
 	scanf("%d", &aux); //Gets the number of vertices (graphVertices) to connect.
 	graph.setGraphVertices(aux);
+	_skyCity = aux+1;
 
 	scanf("%d", &aux); //Gets the max number of airports (networkMaxAirports).
 	graph.setMaxAirports(aux);
