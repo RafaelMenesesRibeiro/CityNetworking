@@ -69,36 +69,18 @@ public:
 		this->networkMaxAirports = 0;
 		this->networkMaxRoads = 0;
 	}
-
 	~Graph() {}
 
-	int getSky() {
-		return skyCity;
-	}
+	//Getters.
+	int getSky() { return skyCity; }
+	int getNumberVertices() { return graphVertices; }
+	int getMaxAirports() { return networkMaxAirports; }
+	int getMaxRoads() { return networkMaxRoads; }
 
-	int getNumberVertices() {
-		return graphVertices;
-	}
-
-	int getMaxAirports() {
-		return networkMaxAirports;
-	}
-
-	int getMaxRoads() {
-		return networkMaxRoads;
-	}
-
-	void setNumberVertices(int i) {
-		graphVertices = i;
-	}
-
-	void setMaxAirports(int i) {
-		networkMaxAirports = i;
-	}
-
-	void setMaxRoads(int i) {
-		networkMaxRoads = i;
-	}
+	//Setters.
+	void setNumberVertices(int i) { graphVertices = i; }
+	void setMaxAirports(int i) { networkMaxAirports = i; }
+	void setMaxRoads(int i) { networkMaxRoads = i; }
 
 	//Creates a new edge, <connection, cost>.
 	Edge edgeCreate(int a, int b, int c) {
@@ -200,4 +182,10 @@ int main() {
 		}
 	}
 
+	/*--------------------------------------------------------------------------
+
+			Minimum Spanning Tree finding (Kruskal's algorithm)
+
+	--------------------------------------------------------------------------*/
+	graph.kruskalMST();
 }
