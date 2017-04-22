@@ -100,15 +100,28 @@ public:
 		networkMaxRoads = i;
 	}
 
-	void addEdge(Edge e) {
-		edgeList.push_back(e);
-	}
-
-	Edge newEdge(int a, int b, int c) {
+	//Creates a new edge, <connection, cost>.
+	Edge edgeCreate(int a, int b, int c) {
 		Connection con = make_pair(a, b);
 		Edge e = make_pair(con, c);
 		return e;
 	}
+	//Adds the new adge to the graph.
+	void edgeAdd(Edge e) { edgeList.push_back(e); }
+
+	//Checks if the vertex has connections.
+	bool vertexCheckConnected(int city) {
+		for (list<Edge>::const_iterator it = edgeList.begin(); it != edgeList.end(); ++it) {
+			Connection connection = (*it).first; //Gets the connection of the edge.
+			int cityA = connection.first; //Gets one city.
+			int cityB = connection.second; //Gets the other city.
+			if (cityA == city || cityB == city) { //If any of the cities match the given one.
+				return true; //Returns true if it finds the given city as connections.
+			}
+		}
+		return false; //Returns false if the given city as no connections.
+	}
+
 
 	//Calculates the MST for this graph, generating the desired network.
 	void kruskalMST();
@@ -157,16 +170,16 @@ int main() {
 	graph.setMaxAirports(scanfAux);
 	for (i = 0; i < scanfAux; i++) { //Creates all the airways.
 		scanf("%d %d", &a, &c);
-		e = graph.newEdge(a, graph.getSky(), c);
-		graph.addEdge(e);
+		e = graph.edgeCreate(a, graph.getSky(), c);
+		graph.edgeAdd(e);
 	}
 	
 	scanf("%d", &scanfAux); //Gets the max number of roads (networkMaxRoads).
 	graph.setMaxRoads(scanfAux);
 	for (i = 0; i < scanfAux; i++) { //Creates all the roads.
 		scanf("%d %d %d", &a, &b, &c);
-		e = graph.newEdge(a, b, c);
-		graph.addEdge(e);
+		e = graph.edgeCreate(a, b, c);
+		graph.edgeAdd(e);
 	}
 
 	/*--------------------------------------------------------------------------
@@ -176,7 +189,16 @@ int main() {
 	--------------------------------------------------------------------------*/
 	//If the number os total connections isn't enough to connect the graph.
 	if (graph.getMaxRoads() + graph.getMaxAirports() < graph.getNumberVertices() - 1) {
-		outputInsuficient();
-		return 0;
+		outputInsuficient(); //Prints the output.
+		return 0; //Quits.
 	}
+
+	//Checks if all the vertices have at least one connection.
+	for (i = 1; i <= graph.getNumberVertices(); i++) {
+		if(!graph.vertexCheckConnected(i)) { //If the city has no connections.
+			outputInsuficient(); //Prints the output.
+			return 0; //Quits.
+		}
+	}
+
 }
