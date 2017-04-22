@@ -14,21 +14,22 @@
 #include <algorithm>
 #include <utility>
 
+using namespace std;
+using std::pair;
+
 /*------------------------------------------------------------------------------
 //	STRUCTS
 ------------------------------------------------------------------------------*/
 
 /* Connection represents a road or airway from city int:a to city int:b */
-typedef pair<int, int> connection;
+typedef pair<int, int> Connection;
 /* Edge is a pair whose elements are a connection and the respective int:cost */
-typedef pair<connection, int> edge;
+typedef pair<Connection, int> Edge;
 /* Network is a */
 
 /*------------------------------------------------------------------------------
 //	CONSTANTS
 ------------------------------------------------------------------------------*/
-
-using namespace std;
 
 /*------------------------------------------------------------------------------
 //	GLOBAL VARIABLES
@@ -57,54 +58,62 @@ int mc, ma, mr, a, b, c;
 class Graph {
   private:
     /* Abstract city to which all cities with airports connect */
-    int _skyCity = -1;
+    int skyCity;
     /* Number of vertices in the graph, that is to be turned into an MST */
-    int _cities = 0;
+    int cities;
     /* Total number of allowed airports in the graph */
-    int _airports = 0;
+    int airports;
     /* Total number of allowed roads in the graph */
-    int _roads = 0;
+    int roads;
     /* Listing of all concrete edges in the graph, edge = <connection, cost> */
-    list<edge> _edgeList;
+    list<Edge> edgeList;
 
   public:
-    Graph();
-    ~Graph();
+    Graph() {
+        this->skyCity = -1;
+        this->cities = 0;
+        this->airports = 0;
+        this->roads = 0;
+    }
+
+    ~Graph() {}
 
     int getSky() {
-      return _skyCity;
+      return skyCity;
     }
 
     int getCities() {
-      return _cities;
+      return cities;
     }
 
     int getAiports() {
-      return _airports;
+      return airports;
     }
 
     int getRoads() {
-      return _roads;
+      return roads;
     }
 
     void setCities(int c) {
-      _cities = c;
+      cities = c;
     }
 
     void setAirports(int a) {
-      _airports = a;
+      airports = a;
     }
 
     void setRoads(int r) {
-      _roads = r;
+      roads = r;
     }
 
-    void addEdge(edge e) {
-      _edgeList.push_back(e);
+    void addEdge(Edge e) {
+      edgeList.push_back(e);
     }
 
-    edge newEdge(int a, int b, int c) {
-      return {{a, b}, c};
+    Edge newEdge(int a, int b, int c) {
+      Connection con = make_pair(a, b);
+      Edge e = make_pair(con, c);
+      return e;
     }
 
     /* Calculates the MST for this graph, generating the desired network */
@@ -113,7 +122,7 @@ class Graph {
 
 };
 
-Graph::kruskalMST() {
+void Graph::kruskalMST() {
   // TODO
 }
 
@@ -122,35 +131,35 @@ int main() {
   /* int iterator */
   int i;
   /* edge auxiliar */
-  edge e;
-  /* Instanciate new graph */
-  Graph graph();
+  Edge e;
+  /* Instanciate new graph with default constructor */
+  Graph graph;
 
   /* Reading inputs from standart input, given by user */
 
   /* Gets amount of cities to connect */
-  scanf(%d, &mc);
+  scanf("%d", &mc);
   graph.setCities(mc);
 
   /* Gets maximum amount of airports */
-  scanf(%d, &ma);
+  scanf("%d", &ma);
   graph.setAirports(ma);
 
   /* Creates all airways */
   for (i = 0; i < ma; i++) {
     scanf("%d %d", &a, &c);
-    e = newEdge(a, graph.getSky(), c);
+    e = graph.newEdge(a, graph.getSky(), c);
     graph.addEdge(e);
   }
 
   /* Gets maximum amount of roads */
-  scanf(%d, &mr);
+  scanf("%d", &mr);
   graph.setRoads(mr);
 
   /* Creates all roads */
   for (i = 0; i < mr; i++) {
     scanf("%d %d %d", &a, &b, &c);
-    e = newEdge(a, b, c);
+    e = graph.newEdge(a, b, c);
     graph.addEdge(e);
   }
 
