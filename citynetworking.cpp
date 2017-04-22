@@ -160,8 +160,10 @@ int main() {
 	graph.setMaxRoads(scanfAux);
 	for (i = 0; i < scanfAux; i++) { //Creates all the roads.
 		scanf("%d %d %d", &a, &b, &c);
-		e = graph.edgeCreate(a, b, c);
-		graph.edgeAdd(e);
+		if (a != b) { //If the vertices aren's the same - avoids self loops.
+			e = graph.edgeCreate(a, b, c);
+			graph.edgeAdd(e);
+		}
 	}
 
 	/*--------------------------------------------------------------------------
