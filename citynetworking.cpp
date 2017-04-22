@@ -111,6 +111,7 @@ public:
 
 	//Checks if the vertex has connections.
 	bool vertexCheckConnected(int city) {
+		cout << "checking city #" << city << endl;
 		for (list<Edge>::const_iterator it = edgeList.begin(); it != edgeList.end(); ++it) {
 			Connection connection = (*it).first; //Gets the connection of the edge.
 			int cityA = connection.first; //Gets one city.
@@ -192,7 +193,6 @@ int main() {
 		outputInsuficient(); //Prints the output.
 		return 0; //Quits.
 	}
-
 	//Checks if all the vertices have at least one connection.
 	for (i = 1; i <= graph.getNumberVertices(); i++) {
 		if(!graph.vertexCheckConnected(i)) { //If the city has no connections.
