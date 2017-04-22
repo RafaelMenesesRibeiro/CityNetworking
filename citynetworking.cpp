@@ -13,6 +13,7 @@
 #include <string>
 #include <algorithm>
 #include <vector>
+#include <utility>
 
 /*------------------------------------------------------------------------------
 //	STRUCTS
@@ -145,7 +146,7 @@ int main() {
 
   /* Gets maximum amount of roads */
   scanf(%d, &mr);
-  
+
   /* Creates all roads */
   for (i = 0; i < mr; i++) {
     scanf("%d %d %d", &a, &b, &c);
