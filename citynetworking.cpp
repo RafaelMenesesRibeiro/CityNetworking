@@ -118,6 +118,20 @@ void Graph::kruskalMST() {
 	//TODO - @RafaelRibeiro
 }
 
+/*------------------------------------------------------------------------------
+
+			AUXILIAR FUNCTIONS
+
+------------------------------------------------------------------------------*/
+//Auxiliar function to print the output.
+void outputInsuficient() { cout << "Insuficiente" << endl; }
+
+
+/*------------------------------------------------------------------------------
+
+			CODE EXECUTION
+
+------------------------------------------------------------------------------*/
 //Application that calculates the MST.
 int main() {
 	int i;
@@ -131,14 +145,14 @@ int main() {
 	Edge e; //Edge (auxiliar).
 	Graph graph; //Instanciate new graph with default constructor.
 
-	/*----------------------------------------------------------------------------
+	/*--------------------------------------------------------------------------
 
 			Creation of the Graph
 
-	----------------------------------------------------------------------------*/
+	--------------------------------------------------------------------------*/
 	scanf("%d", &scanfAux); //Gets the number of vertices (graphVertices) to connect.
 	graph.setNumberVertices(scanfAux);
-	
+
 	scanf("%d", &scanfAux); //Gets the max number of airports (networkMaxAirports).
 	graph.setMaxAirports(scanfAux);
 	for (i = 0; i < scanfAux; i++) { //Creates all the airways.
@@ -155,4 +169,14 @@ int main() {
 		graph.addEdge(e);
 	}
 
+	/*--------------------------------------------------------------------------
+
+			Insuficiency Verification
+
+	--------------------------------------------------------------------------*/
+	//If the number os total connections isn't enough to connect the graph.
+	if (graph.getMaxRoads() + graph.getMaxAirports() < graph.getNumberVertices() - 1) {
+		outputInsuficient();
+		return 0;
+	}
 }
