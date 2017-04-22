@@ -1,0 +1,19 @@
+t5.in:
+aeroportos 0
+estradas 10
+custo 10
+
+t6.in:
+aeroportos 2
+estradas 9
+custo 11
+
+t7.in:
+aeroportos 0
+estradas 10
+custo 10
+
+t8.in:
+aeroportos 2
+estradas 9
+custo 11
