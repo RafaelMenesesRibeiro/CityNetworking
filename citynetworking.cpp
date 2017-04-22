@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <string>
 #include <utility>
+#include <functional>
 
 using namespace std;
 using std::pair;
@@ -58,6 +59,29 @@ typedef pair<int, int> Connection;
 //Edge is the pair of elements that make a connection and the respective int:cost.
 typedef pair<Connection, int> Edge;
 //Graph
+
+/*------------------------------------------------------------------------------
+
+			AUXILIAR FUNCTIONS
+
+------------------------------------------------------------------------------*/
+
+bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
+  if (edge.second < anotherEdge.second) {
+    return true;
+  } else if (edge.second == anotherEdge.second) {
+    return false;
+  } else {
+    return false;
+  }
+}
+
+/*------------------------------------------------------------------------------
+
+			CLASSES
+
+------------------------------------------------------------------------------*/
+
 class Graph {
 private:
 	//Abstract city to which all graphVertices with networkMaxAirports connect.
@@ -113,6 +137,10 @@ public:
 		edgeList.push_back(e);
 	}
 
+  void sortEdgeList() {
+      edgeList.sort(edgeWeightComparator);
+  }
+
   void showEdge(Edge e) {
     Connection connection = e.first;
     int connectionCost = e.second;
@@ -137,13 +165,17 @@ public:
 
 	/* Calculates the MST for this graph, generating the desired network */
 	void kruskalMST();
-
-
 };
 
 void Graph::kruskalMST() {
   // TODO
 }
+
+/*------------------------------------------------------------------------------
+
+			APPLICATION
+
+------------------------------------------------------------------------------*/
 
 /* Application that calculates the MST */
 int main() {
