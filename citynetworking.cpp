@@ -7,11 +7,11 @@
 
 //Must be compiled with "g++ -std=c++11 ..."
 
-#include <stdio.h>
+#include <algorithm>
 #include <iostream>
 #include <list>
+#include <stdio.h>
 #include <string>
-#include <algorithm>
 #include <utility>
 
 using namespace std;
@@ -24,23 +24,23 @@ using std::pair;
 ------------------------------------------------------------------------------*/
 
 /*------------------------------------------------------------------------------
-			
+
 			GLOBAL VARIABLES
 
 ------------------------------------------------------------------------------*/
 /*
 Input variables.
-	int:mc 						number of graphVertices to connect (vertices).
-	int:ma 						maximum number of networkMaxAirports allowed in the network.
-	int:mr 						maximum number of networkMaxRoads allowed in the network.
+	int:mc 						  number of graphVertices to connect (vertices).
+	int:ma 						  maximum number of networkMaxAirports allowed in the network.
+	int:mr 						  maximum number of networkMaxRoads allowed in the network.
 	int:a, int:b				graphVertices.
-	int:c 						cost of building an airport on city a or a road between a and b.
+	int:c 						 cost of building an airport on city a or a road between a and b.
 */
 int mc, ma, mr, a, b, c;
 /*
 Output variables.
-	int:networkCost				total weight of the MST - "Minimum cost of connecting all graphVertices".
-	int:networkRoads 			number of networkMaxRoads used.
+	int:networkCost				  total weight of the MST - "Minimum cost of connecting all graphVertices".
+	int:networkRoads 			   number of networkMaxRoads used.
 	int:networkAirports 		number of networkMaxAirports used.
 */
 int networkCost = 0;
@@ -113,6 +113,22 @@ public:
 		edgeList.push_back(e);
 	}
 
+  void showEdge(Edge e) {
+    Connection connection = e.first;
+    int connectionCost = e.second;
+    int cityA = connection.first;
+    int cityB = connection.second;
+    cout << "city a: " << cityA << ", city b: " << cityB << ", cost: " << connectionCost << endl;
+  }
+
+  void printEdgeList() {
+    cout << endl << "graph.printEdgeList()" << endl;
+    list<Edge>::const_iterator ci;
+    for (ci = edgeList.begin(); ci != edgeList.end(); ++ci) {
+      showEdge(*ci);
+    }
+  }
+
 	Edge newEdge(int a, int b, int c) {
 		Connection con = make_pair(a, b);
 		Edge e = make_pair(con, c);
@@ -166,4 +182,7 @@ int main() {
 		graph.addEdge(e);
 	}
 
+  graph.printEdgeList();
+  graph.sortEdgeList();
+  graph.printEdgeList();
 }
