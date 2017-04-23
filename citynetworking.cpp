@@ -29,12 +29,12 @@ using std::pair;
 			GLOBAL VARIABLES
 
 ------------------------------------------------------------------------------*/
-int skyCity; //City that connects all the cities with airports.
-
-//Output variables.
-int networkCost = 0; //Total weight of the MST (Minimum Spanning Tree).
-int networkRoads = 0; //Number of roads in the MST.
-int networkAirports = 0; //Number of airports in the MST.
+// Abstract city to which all cities with airports connect to.
+int skyCity;
+// Output variables.
+int networkCost = 0; 			// Total weight of the MST (Minimum Spanning Tree).
+int networkRoads = 0; 		// Number of roads in the MST.
+int networkAirports = 0; 	// Number of airports in the MST.
 
 
 /*------------------------------------------------------------------------------
@@ -42,9 +42,9 @@ int networkAirports = 0; //Number of airports in the MST.
 			STRUCTS
 
 ------------------------------------------------------------------------------*/
-//Connection represents a road or airway between city int:a to city int:b.
+// Connection represents a road or airway between city int:a to city int:b.
 typedef pair<int, int> Connection;
-//Edge is the pair of elements whose elements are a connection and the respective int:cost.
+// Edge is the pair of elements whose elements are a connection and the respective int:cost.
 typedef pair<Connection, int> Edge;
 
 
@@ -53,15 +53,19 @@ typedef pair<Connection, int> Edge;
 			AUXILIAR FUNCTIONS
 
 ------------------------------------------------------------------------------*/
-//Auxiliar boolean function used on edgeWeightComparator for vector::sort
-//Returns true if and only if edge is not an airway and anotherEdge is.
+
+/**
+* Auxiliar boolean function used on edgeWeightComparator for vector::sort
+* Returns true if and only if edge is not an airway to skyCity and anotherEdge is.
+*/
 bool airwayComparator(Edge edge1, Edge edge2) {
-	int a = edge1.first.second; //Gets cityB of the connection1.
-	int b = edge2.first.second; //Gets cityB of the connection2.
-	if (a != skyCity && b == skyCity) { //If cityB1 is not skyCity and cityB2 is.
+	// Gets the second city in the Connection pair of edge1 and edge2
+	int a = edge1.first.second;
+	int b = edge2.first.second;
+	if (a != skyCity && b == skyCity) {
 		return true;
 	}
-	else { 
+	else {
 		return false;
 	}
 }
@@ -77,25 +81,27 @@ bool airwayComparator(Edge edge1, Edge edge2) {
 * Edges have same weight, Edge is an airway but anotherEdge isnt;
 */
 bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
-	if (edge.second < anotherEdge.second) //If the weight of the first edge is less.
+	if (edge.second < anotherEdge.second)
     	return true;
-  	else if (edge.second == anotherEdge.second) { //If the weights are equal.
-		if (airwayComparator(edge, anotherEdge)) { //Prioritizes roads over airports.
+  	else if (edge.second == anotherEdge.second) {
+		if (airwayComparator(edge, anotherEdge)) {
 			return true;
 		}
  	}
-	else //If the weight of the first city is more.
-  		return false;
+	else
+  	return false;
 }
 
-//Prints the output in case of impossibility of creating a proper network.
-void outputInsuficient() { cout << "Insuficiente" << endl; }
-//Prints the output when a proper newtwork is created.
-void outputMST(int totalCost, int numberAirports, int numberRoads) {
-	cout << totalCost << endl;
-	cout << numberAirports << " " << numberRoads << endl;
+/** Prints the output in case of impossibility of creating a proper network. */
+void insufficientEdges() {
+	cout << "Insuficiente" << endl;
 }
 
+/** Prints the output when a proper newtwork is created. */
+void outputMST() {
+	cout << networkCost << endl;
+	cout << networkAirports << " " << networkRoads << endl;
+}
 
 /*------------------------------------------------------------------------------
 
@@ -103,148 +109,152 @@ void outputMST(int totalCost, int numberAirports, int numberRoads) {
 
 ------------------------------------------------------------------------------*/
 class Graph {
-private:
-	//Abstract city to which all graphVertices with an airport connect.
-	int skyCity;
-	//Number of vertices in the graph, that is to be turned into an MST.
-	int graphVertices;
-	//Total number of allowed networkMaxAirports in the graph.
-	int networkMaxAirports;
-	//Total number of allowed networkMaxRoads in the graph.
-	int networkMaxRoads;
-	//Listing of all concrete edges in the graph, edge = <connection, cost>.
-	vector<Edge> edgeVector;
-	int *parent;
-	int *rnk;
-public:
-	Graph(int vertices) {
-		this->skyCity = vertices + 1;
-		this->graphVertices = vertices;
-		this->networkMaxAirports = 0;
-		this->networkMaxRoads = 0;
-	}
-	~Graph() {}
+	private:
+		int graphVertices;
+		int networkMaxAirports;
+		int networkMaxRoads;
+		int *parent;
+		int *rank;
+		// Vector holds all concrete Edges<Connection, cost> in this graph.
+		vector<Edge> edgeVector;
 
-	//Getters.
-	int getSkyCity() { return skyCity; }
-	int getGraphVertices() { return graphVertices; }
-	int getMaxAirports() { return networkMaxAirports; }
-	int getMaxRoads() { return networkMaxRoads; }
+	public:
+		Graph(int vertices) {
+			this->graphVertices = vertices;
+			this->networkMaxAirports = 0;
+			this->networkMaxRoads = 0;
+		}
+		~Graph() {}
 
-	//Setters.
-	void setMaxAirports(int i) { networkMaxAirports = i; }
-	void setMaxRoads(int i) { networkMaxRoads = i; }
+		// Getters.
+		int getGraphVertices() { return graphVertices; }
+		int getMaxAirports() { return networkMaxAirports; }
+		int getMaxRoads() { return networkMaxRoads; }
 
-	//Checks if the vertex has connections.
-	bool vertexCheckConnected(int city) {
-		for (vector<Edge>::const_iterator it = edgeVector.begin(); it != edgeVector.end(); it++) {
-			Connection connection = (*it).first; //Gets the connection of the edge.
-			int cityA = connection.first; //Gets one city.
-			int cityB = connection.second; //Gets the other city.
-			if (cityA == city || cityB == city) { //If any of the cities match the given one.
-				return true; //Returns true if it finds the given city as connections.
+		// Setters.
+		void setMaxAirports(int i) { networkMaxAirports = i; }
+		void setMaxRoads(int i) { networkMaxRoads = i; }
+
+		/**
+		* Checks if the vertex has connections
+		* Returns true if the recieved vertex(city) is connected to some other city.
+		*/
+		bool vertexIsConnected(int city) {
+			vector<Edge>::const_iterator it;
+			for (it = edgeVector.begin(); it != edgeVector.end(); it++) {
+				Connection connection = (*it).first;
+				int cityA = connection.first;
+				int cityB = connection.second;
+				if (cityA == city || cityB == city)
+					return true;
+			}
+			return false;
+		}
+
+		// Edge methods
+		/** Creates a new edge, <connection, cost>. */
+		Edge newEdge(int a, int b, int c) {
+			Connection con = make_pair(a, b);
+			Edge e = make_pair(con, c);
+			return e;
+		}
+
+		/** Adds the new adge to the graph.*/
+		void addEdge(Edge e) {
+			edgeVector.push_back(e);
+		}
+
+		/** Prints to standard output the information of the given edge. */
+		void printEdge(Edge e) {
+			Connection connection = e.first;
+			int connectionCost = e.second;
+			int cityA = connection.first;
+			int cityB = connection.second;
+			cout << "city a: " << cityA << ", city b: " << cityB << ", cost: " << connectionCost << endl;
+		}
+
+		/** Prints to standart output the information of all edges in this graph. */
+		void printEdgeList() {
+			cout << endl << "graph.printEdgeList()" << endl;
+			vector<Edge>::const_iterator ci;
+			for (ci = edgeVector.begin(); ci != edgeVector.end(); ci++) {
+				printEdge(*ci);
 			}
 		}
-		return false; //Returns false if the given city as no connections.
-	}
 
-	//Creates a new edge, <connection, cost>.
-	Edge newEdge(int a, int b, int c) {
-		Connection con = make_pair(a, b);
-		Edge e = make_pair(con, c);
-		return e;
-	}
-	//Adds the new adge to the graph.
-	void addEdge(Edge e) { edgeVector.push_back(e); }
-	//Prints to standard output the information of a given edge.
-	void printEdge(Edge e) {
-		Connection connection = e.first;
-		int connectionCost = e.second;
-		int cityA = connection.first;
-		int cityB = connection.second;
-		cout << "city a: " << cityA << ", city b: " << cityB << ", cost: " << connectionCost << endl;
-	}
-	//Prints to standart output the information of all edges in this graph.
-	void printEdgeList() {
-		cout << endl << "graph.printEdgeList()" << endl;
-		for (vector<Edge>::const_iterator ci = edgeVector.begin(); ci != edgeVector.end(); ci++) {
-			printEdge(*ci);
+		/** Sorts the concrete edges in this graphs edgeVector */
+		void sortEdges() {
+			sort(edgeVector.begin(), edgeVector.end(), edgeWeightComparator);
 		}
-	}
-	void makeSet(int vert);
-	int findSet(int u);
-	void uniteSet(int x, int y);
-	int kruskalMST(); //Calculates the MST for this graph, generating the desired network.
-	void answerFormat(); //Checks the MST for the required values;
-};
-void Graph::makeSet(int vert) {
-	int n = getGraphVertices() + 1;
-	parent = new int[n];
-	rnk = new int[n];
-	for (int i = 0; i < n; i++) {
-		rnk[i] = 0;
-		parent[i] = i;
-	}
-}
-int Graph::findSet(int u) {
-	if (u != parent[u]) {
-		int i = parent[u];
-		parent[u] = findSet(i);
-	}
-	return parent[u];
-}
-void Graph::uniteSet(int x, int y) {
-	x = findSet(x);
-	y = findSet(y);
-	if (rnk[x] > rnk[y]) {
-		parent[y] = x;
-	}
-	else {
-		parent[x] = y;
-	}
-	if(rnk[x] == rnk[y]) {
-		(rnk[y])++;
-	}
-}
+		/** Calculates the MST for this graph, generating the desired network. */
+		void kruskalMST() {
+			int u, v, setU, setV;
+			makeSet();
+			sortEdges();
 
-//Calculates the MST for this graph, generating the desired network.
-int Graph::kruskalMST() {
-	makeSet(getGraphVertices());
-	//Sorts the edges nondecrescent by weight, prioritazing roads.
-	sort(edgeVector.begin(), edgeVector.end(), edgeWeightComparator);
-	for (vector<Edge>::const_iterator it = edgeVector.begin(); it != edgeVector.end(); it++) {
-		int u = (*it).first.first;
-		int v = (*it).first.second;
-		int set_u = findSet(u);
-		int set_v = findSet(v);
-		if (set_u != set_v) {
-			//cout << u << " - " << v << endl;
-			if (v == skyCity) {
-				networkAirports++;
+			vector<Edge>::const_iterator it;
+			for (it = edgeVector.begin(); it != edgeVector.end(); it++) {
+				u = (*it).first.first;
+				v = (*it).first.second;
+				setU = findSet(u);
+				setV = findSet(v);
+				if (setU != setV) {
+					//cout << u << " - " << v << endl;
+					if (v == skyCity)
+						networkAirports++;
+					else
+						networkRoads++;
+					networkCost += (*it).second;
+					uniteSet(setU, setV);
+				}
 			}
-			else {
-				networkRoads++;
-			}
-			networkCost += (*it).second;
-			uniteSet(set_u, set_v);
+			answerFormat();
 		}
-	}
-	answerFormat();
-	return networkCost;
-}
-//Checks the MST for the required values;
-void Graph::answerFormat() {
-	//TODO - @RafaelRibeiro
-	return;
-}
 
+		/** Finds the set to which given vertex(city) belongs to */
+		int findSet(int u) {
+			if (u != parent[u]) {
+				int i = parent[u];
+				parent[u] = findSet(i);
+			}
+			return parent[u];
+		}
+
+		/** Initializes one set each with one vertex equal to skyCity int value. */
+		void makeSet() {
+			parent = new int[skyCity];
+			rank = new int[skyCity];
+			for (int i = 0; i < skyCity; i++) {
+				rank[i] = 0;
+				parent[i] = i;
+			}
+		}
+
+		/** If u and v don't belong to the same set, unite them into the growing MST */
+		void uniteSet(int u, int v) {
+			u = findSet(u);
+			v = findSet(v);
+
+			if (rank[u] > rank[v])
+				parent[v] = u;
+			else
+				parent[u] = v;
+
+			if(rank[u] == rank[v])
+				(rank[v])++;
+		}
+
+		/** Checks the MST for the required values; */
+		void answerFormat() {
+			// TODO
+		}
+	};
 
 /*------------------------------------------------------------------------------
 
-			CODE EXECUTION
+			Application
 
 ------------------------------------------------------------------------------*/
-//Application that calculates the MST.
 int main() {
 	/**
 	* Input variables.
@@ -255,43 +265,54 @@ int main() {
 	int aux, a, b, c;
 	int i;
 	Edge e; //Edge (auxiliar).
-	
-	scanf("%d", &aux); //Gets the number of vertices (graphVertices) to connect.
-	Graph graph(aux); //Instanciate new graph with default constructor.
-	skyCity = aux + 1; //Sets the value of the global variable.
 
-	scanf("%d", &aux); //Gets the max number of airports (networkMaxAirports).
-	graph.setMaxAirports(aux); //Sets the maximum number of airports.
-	for (i = 0; i < aux; i++) { //Creates all the airways.
+	// Gets the number of vertices (graphVertices) to connect.
+	scanf("%d", &aux);
+	skyCity = aux + 1;
+	Graph graph(aux);
+
+	// Gets the max number of airports (networkMaxAirports).
+	scanf("%d", &aux);
+	graph.setMaxAirports(aux);
+
+	// Creates all the airways, connecting all cities with airports to skyCity.
+	for (i = 0; i < aux; i++) {
 		scanf("%d %d", &a, &c);
-		e = graph.newEdge(a, graph.getSkyCity(), c);
+		e = graph.newEdge(a, skyCity, c);
 		graph.addEdge(e);
 	}
 
-	scanf("%d", &aux); //Gets the max number of roads (networkMaxRoads).
-	graph.setMaxRoads(aux); //Sets the maximum number of roads.
-	for (i = 0; i < aux; i++) { //Creates all the roads.
+	// Gets the max number of roads (networkMaxRoads).
+	scanf("%d", &aux);
+	graph.setMaxRoads(aux);
+
+	// Creates all the roads connecting city a to city b, if a and b aren't the same
+	for (i = 0; i < aux; i++) {
 		scanf("%d %d %d", &a, &b, &c);
-		if (a != b) { //If the vertices aren't the same - avoids self loops.
+		if (a != b) {
 			e = graph.newEdge(a, b, c);
 			graph.addEdge(e);
 		}
 	}
 
-	//If the number os total connections isn't enough to connect the graph.
+	// If the number os total connections isn't enough to connect the graph, end with bad output.
 	if (graph.getMaxRoads() + graph.getMaxAirports() < graph.getGraphVertices() - 1) {
-		outputInsuficient(); //Prints the output.
-		return 0; //Quits.
+		insufficientEdges();
+		return 0;
 	}
-	//Checks if all the vertices have at least one connection.
+
+	// Checks if all the vertices have at least one connection, end with bad output.
 	for (i = 1; i <= graph.getGraphVertices(); i++) {
-		if(!graph.vertexCheckConnected(i)) { //If the city has no connections.
-			outputInsuficient(); //Prints the output.
-			return 0; //Quits.
+		if(!graph.vertexIsConnected(i)) {
+			insufficientEdges();
+			return 0;
 		}
 	}
 
-	graph.kruskalMST(); //Runs Kruskal's algorithm to find the MST.
-	outputMST(networkCost, networkAirports, networkRoads); //Prints the answer.
+	// Runs Kruskal's algorithm to find the MST.
+	graph.kruskalMST();
+
+	// Prints the answer.
+	outputMST();
 	return 0;
 }
