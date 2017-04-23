@@ -102,41 +102,6 @@ void outputMST(int totalCost, int numberAirports, int numberRoads) {
 			CLASSES
 
 ------------------------------------------------------------------------------*/
-struct DisjointSets {
-	int *parent, *rnk;
-	int n;
-
-	DisjointSets(int vert) {
-		this->n = vert + 1;
-		rnk = new int[vert + 1];
-		parent = new int[vert + 1];
-		for (int i = 0; i < vert + 1; i++) {
-			rnk[i] = 0;
-			parent[i] = i;
-		}
-	}
-	int find(int u) {
-		if (u != parent[u]) {
-			parent[u] = find(parent[u]);
-		}
-		return parent[u];
-	}
-	void merge(int x, int y) {
-		x = find(x);
-		y = find(y);
-		if (rnk[x] > rnk[y]) {
-			parent[y] = x;
-		}
-		else {
-			parent[x] = y;
-		}
-		if(rnk[x] == rnk[y]) {
-			rnk[y]++;
-		}
-	}
-};
-
-
 class Graph {
 private:
 	//Abstract city to which all graphVertices with an airport connect.
@@ -149,6 +114,8 @@ private:
 	int networkMaxRoads;
 	//Listing of all concrete edges in the graph, edge = <connection, cost>.
 	vector<Edge> edgeVector;
+	int *parent;
+	int *rnk;
 public:
 	Graph(int vertices) {
 		this->skyCity = vertices + 1;
@@ -204,24 +171,54 @@ public:
 			printEdge(*ci);
 		}
 	}
-
+	void makeSet(int vert);
+	int findSet(int u);
+	void uniteSet(int x, int y);
 	int kruskalMST(); //Calculates the MST for this graph, generating the desired network.
 	void answerFormat(); //Checks the MST for the required values;
 };
+void Graph::makeSet(int vert) {
+	int n = getGraphVertices() + 1;
+	parent = new int[n];
+	rnk = new int[n];
+	for (int i = 0; i < n; i++) {
+		rnk[i] = 0;
+		parent[i] = i;
+	}
+}
+int Graph::findSet(int u) {
+	if (u != parent[u]) {
+		int i = parent[u];
+		parent[u] = findSet(i);
+	}
+	return parent[u];
+}
+void Graph::uniteSet(int x, int y) {
+	x = findSet(x);
+	y = findSet(y);
+	if (rnk[x] > rnk[y]) {
+		parent[y] = x;
+	}
+	else {
+		parent[x] = y;
+	}
+	if(rnk[x] == rnk[y]) {
+		(rnk[y])++;
+	}
+}
 
 //Calculates the MST for this graph, generating the desired network.
 int Graph::kruskalMST() {
-	DisjointSets ds(getGraphVertices());
+	makeSet(getGraphVertices());
 	//Sorts the edges nondecrescent by weight, prioritazing roads.
 	sort(edgeVector.begin(), edgeVector.end(), edgeWeightComparator);
-	printEdgeList(); //Debug.
 	for (vector<Edge>::const_iterator it = edgeVector.begin(); it != edgeVector.end(); it++) {
 		int u = (*it).first.first;
 		int v = (*it).first.second;
-		int set_u = ds.find(u);
-		int set_v = ds.find(v);
+		int set_u = findSet(u);
+		int set_v = findSet(v);
 		if (set_u != set_v) {
-			cout << u << " - " << v << endl;
+			//cout << u << " - " << v << endl;
 			if (v == skyCity) {
 				networkAirports++;
 			}
@@ -229,7 +226,7 @@ int Graph::kruskalMST() {
 				networkRoads++;
 			}
 			networkCost += (*it).second;
-			ds.merge(set_u, set_v);
+			uniteSet(set_u, set_v);
 		}
 	}
 	answerFormat();
@@ -294,7 +291,6 @@ int main() {
 		}
 	}
 
-	graph.printEdgeList(); //Debug.
 	graph.kruskalMST(); //Runs Kruskal's algorithm to find the MST.
 	outputMST(networkCost, networkAirports, networkRoads); //Prints the answer.
 	return 0;
