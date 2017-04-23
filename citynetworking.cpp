@@ -36,7 +36,6 @@ int networkCost = 0; 			// Total weight of the MST (Minimum Spanning Tree).
 int networkRoads = 0; 		// Number of roads in the MST.
 int networkAirports = 0; 	// Number of airports in the MST.
 
-
 /*------------------------------------------------------------------------------
 
 			STRUCTS
@@ -46,7 +45,6 @@ int networkAirports = 0; 	// Number of airports in the MST.
 typedef pair<int, int> Connection;
 // Edge is the pair of elements whose elements are a connection and the respective int:cost.
 typedef pair<Connection, int> Edge;
-
 
 /*------------------------------------------------------------------------------
 
@@ -124,7 +122,11 @@ class Graph {
 			this->networkMaxAirports = 0;
 			this->networkMaxRoads = 0;
 		}
-		~Graph() {}
+		
+		~Graph() {
+			delete[] this->parent;
+			delete[] this->rank;
+		}
 
 		// Getters.
 		int getGraphVertices() { return graphVertices; }
@@ -190,7 +192,9 @@ class Graph {
 		void kruskalMST() {
 			int u, v, setU, setV;
 			makeSet();
+			printEdgeList();
 			sortEdges();
+			printEdgeList();
 
 			vector<Edge>::const_iterator it;
 			for (it = edgeVector.begin(); it != edgeVector.end(); it++) {
