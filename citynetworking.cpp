@@ -36,6 +36,7 @@ int networkCost = 0; 			// Total weight of the MST (Minimum Spanning Tree).
 int networkRoads = 0; 		// Number of roads in the MST.
 int networkAirports = 0; 	// Number of airports in the MST.
 
+bool setsWereCreated = false;
 /*------------------------------------------------------------------------------
 
 			STRUCTS
@@ -122,10 +123,12 @@ class Graph {
 			this->networkMaxAirports = 0;
 			this->networkMaxRoads = 0;
 		}
-		
+
 		~Graph() {
-			delete[] this->parent;
-			delete[] this->rank;
+			if (setsWereCreated) {
+				delete[] this->parent;
+				delete[] this->rank;
+			}
 		}
 
 		// Getters.
@@ -228,6 +231,7 @@ class Graph {
 		void makeSet() {
 			parent = new int[skyCity];
 			rank = new int[skyCity];
+			setsWereCreated = true;
 			for (int i = 0; i < skyCity; i++) {
 				rank[i] = 0;
 				parent[i] = i;
