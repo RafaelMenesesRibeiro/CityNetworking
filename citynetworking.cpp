@@ -116,6 +116,8 @@ class Graph {
 		int *rank;
 		// Vector holds all concrete Edges<Connection, cost> in this graph.
 		vector<Edge> edgeVector;
+		vector<Edge> roads;
+		vector<Edge> airports;
 
 	public:
 		Graph(int vertices) {
@@ -169,6 +171,42 @@ class Graph {
 			edgeVector.push_back(e);
 		}
 
+		void addRoad(Edge e) {
+			roads.push_back(e);
+		}
+		void addAirport(Edge e) {
+			airports.push_back(e);
+		}
+
+
+		Edge findEdgeinResult(vector<Edge> result, int cityA, int cityB) {
+			vector<Edge>::const_iterator it;
+			for (it = result.begin(); it != result.end(); it++) {
+				Connection con = (*it).first;
+				int city1 = con.first;
+				int city2 = con.second;
+				if ((cityA == city1 && cityB == city2) || (cityA == city2 && cityB == city1)) {
+					return (*it);
+				}
+			}
+			return newEdge(-1, -1, -1);
+		}
+		vector<Edge> deleteRoad(vector<Edge> result, int cityA, int cityB) {
+			vector<Edge>::const_iterator it;
+			int i = 0;
+			for (it = result.begin(); it != result.end(); it++, i++) {
+				Connection con = (*it).first;
+				int city1 = con.first;
+				int city2 = con.second;
+				if ((cityA == city1 && cityB == city2) || (cityA == city2 && cityB == city1)) {
+					result.erase(result.begin() + i);
+					return result;			
+				}
+			}
+		}
+
+
+
 		/** Prints to standard output the information of the given edge. */
 		void printEdge(Edge e) {
 			Connection connection = e.first;
@@ -191,6 +229,11 @@ class Graph {
 		void sortEdges() {
 			sort(edgeVector.begin(), edgeVector.end(), edgeWeightComparator);
 		}
+
+		void sortRoads() {
+			sort(roads.begin(), roads.end(), edgeWeightComparator);
+		}
+
 		/** Calculates the MST for this graph, generating the desired network. */
 		void kruskalMST() {
 			int u, v, setU, setV;
@@ -215,8 +258,69 @@ class Graph {
 					uniteSet(setU, setV);
 				}
 			}
-			answerFormat();
 		}
+
+		void kruskalRoads() {
+			int u,v, setU, setV;
+			makeSetRoads();
+			sortRoads();
+			vector<Edge>::const_iterator it;
+			vector<Edge> result;
+			for (it = roads.begin(); it != roads.end(); it++) {
+				u = (*it).first.first;
+				v = (*it).first.second;
+				setU = findSet(u);
+				setV = findSet(v);
+				if (setU != setV) {
+					result.push_back((*it));
+					//cout << u << " - " << v << endl;
+					networkRoads++;
+					networkCost += (*it).second;
+					uniteSet(setU, setV);
+				}
+			}
+
+			//Now checks if any of the airports can replace roads.
+			vector<Edge>::const_iterator cair1;
+			vector<Edge>::const_iterator cair2;
+			for (cair1 = airports.begin(); cair1 != airports.end(); cair1++) {
+				if (cair1 + 1 != airports.end()) {
+					for (cair2 = cair1 + 1; cair2 != airports.end(); cair2++) {
+						int airport1 = (*cair1).first.first;
+						int c1 = (*cair1).second;
+						int airport2 = (*cair2).first.first;
+						int c2 = (*cair2).second;
+						Edge ro = findEdgeinResult(result, airport1, airport2);
+						if (ro.first.first != -1) {
+							int cRoad = ro.second;
+							if (c1 + c2 < cRoad) {
+								deleteRoad(result, airport1, airport2);
+								networkAirports++;
+							}
+						}
+					}
+				}
+			}
+			
+			
+
+
+		}
+
+		void makeSetRoads() {
+			int size = getMaxAirports() + getMaxRoads();
+			parent = new int[size];
+			rank = new int[size];
+			setsWereCreated = true;
+			for (int i = 0; i < size; i++) {
+				rank[i] = 0;
+				parent[i] = i;
+			}
+		}
+
+
+
+
 
 		/** Finds the set to which given vertex(city) belongs to */
 		int findSet(int u) {
@@ -251,11 +355,6 @@ class Graph {
 			if(rank[u] == rank[v])
 				(rank[v])++;
 		}
-
-		/** Checks the MST for the required values; */
-		void answerFormat() {
-			// TODO
-		}
 	};
 
 /*------------------------------------------------------------------------------
@@ -287,6 +386,7 @@ int main() {
 	for (i = 0; i < aux; i++) {
 		scanf("%d %d", &a, &c);
 		e = graph.newEdge(a, skyCity, c);
+		graph.addAirport(e);
 		graph.addEdge(e);
 	}
 
@@ -299,6 +399,7 @@ int main() {
 		scanf("%d %d %d", &a, &b, &c);
 		if (a != b) {
 			e = graph.newEdge(a, b, c);
+			graph.addRoad(e);
 			graph.addEdge(e);
 		}
 	}
@@ -318,7 +419,10 @@ int main() {
 	}
 
 	// Runs Kruskal's algorithm to find the MST.
-	graph.kruskalMST();
+	
+	//graph.kruskalMST();
+	graph.kruskalRoads();
+
 
 	// Prints the answer.
 	outputMST();
