@@ -88,6 +88,7 @@ bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
 		}
  	}
 	else
+  		return false;
   	return false;
 }
 
@@ -265,30 +266,30 @@ int main() {
 	int aux, a, b, c;
 	int i;
 	Edge e; //Edge (auxiliar).
-
+	int notused = 0;
 	// Gets the number of vertices (graphVertices) to connect.
-	scanf("%d", &aux);
+	notused = scanf("%d", &aux);
 	skyCity = aux + 1;
 	Graph graph(aux);
 
 	// Gets the max number of airports (networkMaxAirports).
-	scanf("%d", &aux);
+	notused = scanf("%d", &aux);
 	graph.setMaxAirports(aux);
 
 	// Creates all the airways, connecting all cities with airports to skyCity.
 	for (i = 0; i < aux; i++) {
-		scanf("%d %d", &a, &c);
+		notused = scanf("%d %d", &a, &c);
 		e = graph.newEdge(a, skyCity, c);
 		graph.addEdge(e);
 	}
 
 	// Gets the max number of roads (networkMaxRoads).
-	scanf("%d", &aux);
+	notused = scanf("%d", &aux);
 	graph.setMaxRoads(aux);
 
 	// Creates all the roads connecting city a to city b, if a and b aren't the same
 	for (i = 0; i < aux; i++) {
-		scanf("%d %d %d", &a, &b, &c);
+		notused = scanf("%d %d %d", &a, &b, &c);
 		if (a != b) {
 			e = graph.newEdge(a, b, c);
 			graph.addEdge(e);
@@ -308,6 +309,8 @@ int main() {
 			return 0;
 		}
 	}
+
+	aux = notused;
 
 	// Runs Kruskal's algorithm to find the MST.
 	graph.kruskalMST();
