@@ -1,11 +1,11 @@
-//ASA Project 1
+//ASA Project 2
 //2016/2017 - 2st Semestre
 //Instituto Superior Tecnico
 //U.C. Análise e Síntese de Algoritmos
 //Francisco Barros, nº 85069
 //Rafael Ribeiro, nº 84758
 
-//Must be compiled with "g++ -o3 -ansi -Wall -o citynetworking citynetworking.cpp"
+//Compile with "g++ -o3 -ansi -Wall -o citynetworking citynetworking.cpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -16,76 +16,72 @@
 #include <utility>
 
 /*------------------------------------------------------------------------------
+			
 			CONSTANTS
+
 ------------------------------------------------------------------------------*/
 using namespace std;
 using std::pair;
 
 
 /*------------------------------------------------------------------------------
+			
 			GLOBAL VARIABLES
-------------------------------------------------------------------------------*/
-// Abstract city to which all cities with airports connect to.
-int skyCity;
-int skyCityCost = 0;
-// Counts how many edges MST obtains during execution.
-int airwayMstEdgeCount = 0;
-// Output variables.
-int airwayNetworkCost = 0; 			// Total weight of the MST (Minimum Spanning Tree).
-int airwayNetworkRoads = 0; 		// Number of roadsVector in the MST.
-int airwayNetworkAirports = 0; 	// Number of airports in the MST.
 
+------------------------------------------------------------------------------*/
+int skyCity; //Abstract city to which all cities with airports connect to.
+
+int airwayMstEdgeCount = 0; //Counts how many edges MST obtains during execution.
+//Output variables.
+int airwayNetworkCost = 0; 			//Total weight of the MST (Minimum Spanning Tree).
+int airwayNetworkRoads = 0; 		//Number of roadsVector in the MST.
+int airwayNetworkAirports = 0; 		//Number of airports in the MST.
+
+int roadNetworkCost = 0; 			//Total weight of the MST (Minimum Spanning Tree).
 int roadMstEdgeCount = 0;
-int roadNetworkCost = 0; 		// Total weight of the MST (Minimum Spanning Tree).
-int roadNetworkRoads = 0; 		// Number of roadsVector in the MST.
+int roadNetworkRoads = 0; 			//Number of roadsVector in the MST.
 
 bool airportsWereUsed = false;
 bool validRoadMst = false;
 bool validAirwayMst = false;
 
 /*------------------------------------------------------------------------------
+			
 			STRUCTS
+
 ------------------------------------------------------------------------------*/
-// Connection represents a road or airway between city int:a to city int:b.
+//Connection represents a road or airway between city int:a to city int:b.
 typedef pair<int, int> Connection;
-// Edge is the pair of elements whose elements are a connection and the respective int:cost.
+//Edge is the pair of elements whose elements are a connection and the respective int:cost.
 typedef pair<Connection, int> Edge;
 
-/*------------------------------------------------------------------------------
-			AUXILIAR FUNCTIONS
-------------------------------------------------------------------------------*/
 
-/**
-* Auxiliar boolean function used on edgeWeightComparator for vector::sort
-* Returns true if and only if edge is not an airway to skyCity and anotherEdge is.
-*/
+/*------------------------------------------------------------------------------
+
+			AUXILIAR FUNCTIONS
+
+------------------------------------------------------------------------------*/
+//Auxiliar function used on edgeWeightComparator for sorting.
+//Prioritizes roads over airways.
+//Returns true only if edge1 is not an airway to skyCity and edge2 is.
 bool airwayComparator(Edge edge1, Edge edge2) {
-	// Gets the second city in the Connection pair of edge1 and edge2
-	int a = edge1.first.second;
-	int b = edge2.first.second;
-	if (a != skyCity && b == skyCity) {
-		return true;
-	}
-	else {
-		return false;
-	}
+	int a = edge1.first.second; //Gets the second city of the first connection.
+	int b = edge2.first.second; //Gets the second city of the second connection.
+	//If the second connection is to skyCity.
+	if (a != skyCity && b == skyCity) { return true; }
+	else { return false; }
 }
 
-/**
-* Comparator used for sorting the vector of concrete edges with vector::sort
-* Returns true (sort) if:
-* Edge is lighter then anotherEdge
-* Edges have the same weight but Edge isnt an airway and anotherEdge is.
-* Returns false (dont sort) if:
-* Edge is heavier than anotherEdge;
-* Edges have same weight and both are airways;
-* Edges have same weight, Edge is an airway but anotherEdge isnt;
-*/
-bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
-	if (edge.second < anotherEdge.second)
+
+//Comparator used for sorting the vector of concrete edges with vector::sort
+//Returns true (sort) if:
+	// - edge1 has a smaller weight is lighter.
+	// - both have the same weight but edge1 isn't an airway and edge2 is.
+bool edgeWeightComparator(const Edge& edge1, const Edge& edge2) {
+	if (edge1.second < edge2.second)
     	return true;
-  else if (edge.second == anotherEdge.second) {
-		if (airwayComparator(edge, anotherEdge)) {
+  else if (edge1.second == edge2.second) {
+		if (airwayComparator(edge1, edge2)) {
 			return true;
 		}
  	}
@@ -114,7 +110,7 @@ class Graph {
 		int *predecessorRoads;
 		int *rank;
 		int *rankRoads;
-		// Vector holds all concrete Edges<Connection, cost> in this graph.
+		//Vector holds all concrete Edges<Connection, cost> in this graph.
 		vector<Edge> airwayVector;
 		vector<Edge> roadsVector;
 
@@ -130,11 +126,11 @@ class Graph {
 			delete[] this->rank;
 		}
 
-		// Setters.
+		//Setters.
 		void setMaxAirports(int i) { airports = i; }
 		void setMaxRoads(int i) { roads = i; }
 
-		// Edge methods
+		//Edge methods
 		/** Creates a new edge, <connection, cost>. */
 		Edge newEdge(int a, int b, int c) {
 			Connection con = make_pair(a, b);
@@ -148,24 +144,6 @@ class Graph {
 		}
 		void addRoad (Edge e) {
 			roadsVector.push_back(e);
-		}
-
-		/** Prints to standard output the information of the given edge. */
-		void printEdge(Edge e) {
-			Connection connection = e.first;
-			int connectionCost = e.second;
-			int cityA = connection.first;
-			int cityB = connection.second;
-			cout << "city a: " << cityA << ", city b: " << cityB << ", cost: " << connectionCost << endl;
-		}
-
-		/** Prints to standart output the information of all edges in this graph. */
-		void printEdgeList() {
-			cout << endl << "graph.printEdgeList()" << endl;
-			vector<Edge>::const_iterator ci;
-			for (ci = airwayVector.begin(); ci != airwayVector.end(); ci++) {
-				printEdge(*ci);
-			}
 		}
 
 		/** Sorts the concrete edges in this graphs airwayVector */
@@ -273,6 +251,7 @@ class Graph {
 		*/
 		void airwaysKruskalMST() {
 			int u, v, setU, setV;
+			int skyCityCost = 0;
 			airwaysMakeSet();
 			airwaysSort();
 
@@ -323,27 +302,27 @@ int main() {
 	int aux, a, b, c, i, vertices;
 	Edge e; //Edge (auxiliar).
 
-	// Gets the number of cities (graph vertices) meant to be connected.
+	//Gets the number of cities (graph vertices) meant to be connected.
 	cin >> vertices;
 	skyCity = vertices + 1;
 	Graph graph(vertices);
 
-	// Gets the max number of airports (airports).
+	//Gets the max number of airports (airports).
 	cin >> aux;
 	graph.setMaxAirports(aux);
 
-	// Creates all the airways, connecting all cities with airports to skyCity.
+	//Creates all the airways, connecting all cities with airports to skyCity.
 	for (i = 0; i < aux; i++) {
 		cin >> a >> c;
 		e = graph.newEdge(a, skyCity, c);
 		graph.addEdge(e);
 	}
 
-	// Gets the max number of roadsVector (roads).
+	//Gets the max number of roadsVector (roads).
 	cin >> aux;
 	graph.setMaxRoads(aux);
 
-	// Creates all the roadsVector connecting city a to city b, if a and b aren't the same
+	//Creates all the roadsVector connecting city a to city b, if a and b aren't the same
 	for (i = 0; i < aux; i++) {
 		cin >> a >> b >> c;
 		if (a != b) {
@@ -353,23 +332,23 @@ int main() {
 		}
 	}
 
-	// Runs Kruskal's algorithms to find the MST.
+	//Runs Kruskal's algorithms to find the MST.
 	graph.roadsKruskalMST();
 	graph.airwaysKruskalMST();
 
-	// Check sufficiency for the generated road MST.
+	//Check sufficiency for the generated road MST.
 	if (roadMstEdgeCount == vertices - 1) {
 		validRoadMst = true;
 	}
 
-	// Check sufficiency for the generated airway MST.
+	//Check sufficiency for the generated airway MST.
 	if ((airportsWereUsed) && (airwayMstEdgeCount == vertices)) {
 		validAirwayMst = true;
 	} else if ((!airportsWereUsed) && (airwayMstEdgeCount == vertices - 1)) {
 		validAirwayMst = true;
 	}
 
-	// Print the proper output.
+	//Print the proper output.
 	if (!validAirwayMst && !validRoadMst) {
 		cout << "Insuficiente" << endl;
 	} else if (!validAirwayMst && validRoadMst) {
