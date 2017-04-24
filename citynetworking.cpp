@@ -93,11 +93,11 @@ bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
 }
 
 /** Prints the output when a proper newtwork is created. */
-void outputMST() {
+void outputAirwayMst() {
 	cout << airwayNetworkCost << endl;
 	cout << airwayNetworkAirports << " " << airwayNetworkRoads << endl;
 }
-void outputRoads() {
+void outputRoadsMst() {
 	cout << roadNetworkCost << endl;
 	cout << "0" << " " << roadNetworkRoads << endl;
 }
@@ -356,25 +356,28 @@ int main() {
 	graph.kruskalMST();
 
 	// Check sufficiency for the generated MSTs.
-	if (roadMstEdgeCount == vertices - 1)
+	if (roadMstEdgeCount == vertices - 1) {
 		validRoadMst = true;
-	if ((airportsWereUsed) && (airwayMstEdgeCount == vertices))
+	}
+	if ((airportsWereUsed) && (airwayMstEdgeCount == vertices)) {
 		validAirwayMst = true;
-	else if ((!airportsWereUsed) && (airwayMstEdgeCount == vertices - 1))
+	} else if ((!airportsWereUsed) && (airwayMstEdgeCount == vertices - 1)) {
 		validAirwayMst = true;
+	}
 
 	// Print the proper output.
-	if (!validAirwayMst && !validRoadMst)
+	if (!validAirwayMst && !validRoadMst) {
 		cout << "Insuficiente" << endl;
-	else if (!validAirwayMst && validRoadMst)
-		outputRoads();
-	else if (validAirwayMst && !validRoadMst)
-		outputMST();
-	else if (validAirwayMst && validRoadMst) {
-		if (airwayNetworkCost < roadNetworkCost)
-			outputMST();
-		else if (roadNetworkCost <= airwayNetworkCost)
-			outputRoads();
+	} else if (!validAirwayMst && validRoadMst) {
+			outputRoadsMst();
+	} else if (validAirwayMst && !validRoadMst) {
+			outputAirwayMst();
+	}	else if (validAirwayMst && validRoadMst) {
+			if (airwayNetworkCost < roadNetworkCost) {
+				outputAirwayMst();
+			} else if (roadNetworkCost <= airwayNetworkCost) {
+					outputRoadsMst();
+			}
 	}
 
 	return 0;
