@@ -107,12 +107,12 @@ void outputRoads() {
 ------------------------------------------------------------------------------*/
 class Graph {
 	private:
-		int graphVertices;
-		int networkMaxAirports;
-		int networkMaxRoads;
+		int cities;
+		int maxAirports;
+		int maxRoads;
 		int *predecessor;
-		int *rank;
 		int *predecessorRoads;
+		int *rank;
 		int *rankRoads;
 		// Vector holds all concrete Edges<Connection, cost> in this graph.
 		vector<Edge> edgeVector;
@@ -120,9 +120,9 @@ class Graph {
 
 	public:
 		Graph(int vertices) {
-			this->graphVertices = vertices;
-			this->networkMaxAirports = 0;
-			this->networkMaxRoads = 0;
+			this->cities = vertices;
+			this->maxAirports = 0;
+			this->maxRoads = 0;
 		}
 
 		~Graph() {
@@ -131,13 +131,13 @@ class Graph {
 		}
 
 		// Getters.
-		int getGraphVertices() { return graphVertices; }
-		int getMaxAirports() { return networkMaxAirports; }
-		int getMaxRoads() { return networkMaxRoads; }
+		int getCities() { return cities; }
+		int getMaxAirports() { return maxAirports; }
+		int getMaxRoads() { return maxRoads; }
 
 		// Setters.
-		void setMaxAirports(int i) { networkMaxAirports = i; }
-		void setMaxRoads(int i) { networkMaxRoads = i; }
+		void setMaxAirports(int i) { maxAirports = i; }
+		void setMaxRoads(int i) { maxRoads = i; }
 
 		// Edge methods
 		/** Creates a new edge, <connection, cost>. */
@@ -196,7 +196,7 @@ class Graph {
 				setV = findSet(v);
 				if (setU != setV) {
 					if (v == skyCity) {
-						if (networkMaxAirports > 1) {
+						if (maxAirports > 1) {
 							airwayNetworkAirports++;
 							airportsWereUsed = true;
 							airwayNetworkCost += (*it).second;
@@ -315,7 +315,7 @@ int main() {
 	/**
 	* Input variables.
 	* int:aux variable is used to fetch the numbers such as number of cities, etc.
-	* int:a, int:b are both graphVertices, representing two cities.
+	* int:a, int:b are both cities, representing two cities.
 	* int:c represents the cost of building an airport on city a or a road between a and b.
 	*/
 	int aux, a, b, c, i, vertices;
@@ -326,7 +326,7 @@ int main() {
 	skyCity = vertices + 1;
 	Graph graph(vertices);
 
-	// Gets the max number of airports (networkMaxAirports).
+	// Gets the max number of airports (maxAirports).
 	cin >> aux;
 	graph.setMaxAirports(aux);
 
@@ -337,7 +337,7 @@ int main() {
 		graph.addEdge(e);
 	}
 
-	// Gets the max number of roads (networkMaxRoads).
+	// Gets the max number of roads (maxRoads).
 	cin >> aux;
 	graph.setMaxRoads(aux);
 
