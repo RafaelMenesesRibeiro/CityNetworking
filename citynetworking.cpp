@@ -130,11 +130,6 @@ class Graph {
 			delete[] this->rank;
 		}
 
-		// Getters.
-		int getCities() { return cities; }
-		int getMaxAirports() { return airports; }
-		int getMaxRoads() { return roads; }
-
 		// Setters.
 		void setMaxAirports(int i) { airports = i; }
 		void setMaxRoads(int i) { roads = i; }
@@ -174,127 +169,56 @@ class Graph {
 		}
 
 		/** Sorts the concrete edges in this graphs airwayVector */
-		void sortEdges() {
+		void airwaysSort() {
 			sort(airwayVector.begin(), airwayVector.end(), edgeWeightComparator);
 		}
 
-		void sortRoads() {
+		void roadsSort() {
 			sort(roadsVector.begin(), roadsVector.end(), edgeWeightComparator);
 		}
 
-		/** Calculates the MST for this graph, generating the desired network. */
-		void kruskalMST() {
-			int u, v, setU, setV;
-			makeSet();
-			sortEdges();
-
-			vector<Edge>::const_iterator it;
-			for (it = airwayVector.begin(); it != airwayVector.end(); it++) {
-				u = (*it).first.first;
-				v = (*it).first.second;
-				setU = findSet(u);
-				setV = findSet(v);
-				if (setU != setV) {
-					if (v == skyCity) {
-						if (airports > 1) {
-							airwayNetworkAirports++;
-							airportsWereUsed = true;
-							airwayNetworkCost += (*it).second;
-							uniteSet(setU, setV);
-							if (skyCityCost == 0) {
-								skyCityCost = (*it).second;
-							}
-						}
-					}
-					else {
-						airwayNetworkRoads++;
-						airwayNetworkCost += (*it).second;
-						uniteSet(setU, setV);
-					}
-				}
+		int roadsFindSet(int u) {
+			if (u != predecessorRoads[u]) {
+				int i = predecessorRoads[u];
+				predecessorRoads[u] = roadsFindSet(i);
 			}
-
-			if (airwayNetworkAirports == 1) {
-				airwayNetworkAirports = 0;
-				airwayNetworkCost -= skyCityCost;
-				airportsWereUsed = false;
-			}
+			return predecessorRoads[u];
 		}
 
 		/** Finds the set to which given vertex(city) belongs to */
-		int findSet(int u) {
+		int airwaysFindSet(int u) {
 			if (u != predecessor[u]) {
 				int i = predecessor[u];
-				predecessor[u] = findSet(i);
+				predecessor[u] = airwaysFindSet(i);
 			}
 			return predecessor[u];
 		}
 
+		/** Initializes one set each with one vertex equal to roads int value. */
+		void roadsMakeSet() {
+			predecessorRoads = new int[roads];
+			rankRoads = new int[roads];
+			for (int i = 0; i <= roads; i++) {
+				rankRoads[i] = 0;
+				predecessorRoads[i] = i;
+			}
+		}
+
 		/** Initializes one set each with one vertex equal to skyCity int value. */
-		void makeSet() {
+		void airwaysMakeSet() {
 			predecessor = new int[skyCity];
 			rank = new int[skyCity];
-			for (int i = 0; i < skyCity; i++) {
+			for (int i = 0; i <= skyCity; i++) {
 				rank[i] = 0;
 				predecessor[i] = i;
 			}
 		}
 
 		/** If u and v don't belong to the same set, unite them into the growing MST */
-		void uniteSet(int u, int v) {
-			u = findSet(u);
-			v = findSet(v);
-			if (rank[u] > rank[v])
-				predecessor[v] = u;
-			else
-				predecessor[u] = v;
-			if (rank[u] == rank[v])
-				(rank[v])++;
-			airwayMstEdgeCount++;
-		}
+		void roadsUniteSet(int u, int v) {
 
-		void kruskalMSTRoads() {
-			int u, v, setU, setV;
-			makeSetRoads();
-			sortRoads();
-
-			vector<Edge>::const_iterator it;
-			for (it = roadsVector.begin(); it != roadsVector.end(); it++) {
-				u = (*it).first.first;
-				v = (*it).first.second;
-				setU = findSetRoads(u);
-				setV = findSetRoads(v);
-				if (setU != setV) {
-					roadNetworkRoads++;
-					roadNetworkCost += (*it).second;
-					uniteSetRoads(setU, setV);
-				}
-			}
-		}
-
-		int findSetRoads(int u) {
-			if (u != predecessorRoads[u]) {
-				int i = predecessorRoads[u];
-				predecessorRoads[u] = findSetRoads(i);
-			}
-			return predecessorRoads[u];
-		}
-
-		/** Initializes one set each with one vertex equal to skyCity int value. */
-		void makeSetRoads() {
-			predecessorRoads = new int[getMaxRoads()+1];
-			rankRoads = new int[getMaxRoads()+1];
-			for (int i = 0; i <= getMaxRoads(); i++) {
-				rankRoads[i] = 0;
-				predecessorRoads[i] = i;
-			}
-		}
-
-		/** If u and v don't belong to the same set, unite them into the growing MST */
-		void uniteSetRoads(int u, int v) {
-
-			u = findSetRoads(u);
-			v = findSetRoads(v);
+			u = roadsFindSet(u);
+			v = roadsFindSet(v);
 
 			if (rankRoads[u] > rankRoads[v])
 				predecessorRoads[v] = u;
@@ -305,6 +229,84 @@ class Graph {
 				(rankRoads[v])++;
 
 			roadMstEdgeCount++;
+		}
+
+		/** If u and v don't belong to the same set, unite them into the growing MST */
+		void airwaysUniteSet(int u, int v) {
+			u = airwaysFindSet(u);
+			v = airwaysFindSet(v);
+			if (rank[u] > rank[v])
+				predecessor[v] = u;
+			else
+				predecessor[u] = v;
+			if (rank[u] == rank[v])
+				(rank[v])++;
+			airwayMstEdgeCount++;
+		}
+
+		/**
+		* Calculates the MST for this graph, generating the desired network using
+		* only roads.
+		*/
+		void roadsKruskalMST() {
+			int u, v, setU, setV;
+			roadsMakeSet();
+			roadsSort();
+
+			vector<Edge>::const_iterator it;
+			for (it = roadsVector.begin(); it != roadsVector.end(); it++) {
+				u = (*it).first.first;
+				v = (*it).first.second;
+				setU = roadsFindSet(u);
+				setV = roadsFindSet(v);
+				if (setU != setV) {
+					roadNetworkRoads++;
+					roadNetworkCost += (*it).second;
+					roadsUniteSet(setU, setV);
+				}
+			}
+		}
+
+		/**
+		* Calculates the MST for this graph, generating the desired network using
+		* both roads and airways.
+		*/
+		void airwaysKruskalMST() {
+			int u, v, setU, setV;
+			airwaysMakeSet();
+			airwaysSort();
+
+			vector<Edge>::const_iterator it;
+			for (it = airwayVector.begin(); it != airwayVector.end(); it++) {
+				u = (*it).first.first;
+				v = (*it).first.second;
+				setU = airwaysFindSet(u);
+				setV = airwaysFindSet(v);
+				if (setU != setV) {
+					if (v == skyCity) {
+						if (airports > 1) {
+							airwayNetworkAirports++;
+							airportsWereUsed = true;
+							airwayNetworkCost += (*it).second;
+							airwaysUniteSet(setU, setV);
+							if (skyCityCost == 0) {
+								skyCityCost = (*it).second;
+							}
+						}
+					}
+					else {
+						airwayNetworkRoads++;
+						airwayNetworkCost += (*it).second;
+						airwaysUniteSet(setU, setV);
+					}
+				}
+			}
+
+			if (airwayNetworkAirports == 1) {
+				airwayNetworkAirports = 0;
+				airwayNetworkCost -= skyCityCost;
+				airportsWereUsed = false;
+			}
 		}
 	};
 
@@ -352,13 +354,15 @@ int main() {
 	}
 
 	// Runs Kruskal's algorithms to find the MST.
-	graph.kruskalMSTRoads();
-	graph.kruskalMST();
+	graph.roadsKruskalMST();
+	graph.airwaysKruskalMST();
 
-	// Check sufficiency for the generated MSTs.
+	// Check sufficiency for the generated road MST.
 	if (roadMstEdgeCount == vertices - 1) {
 		validRoadMst = true;
 	}
+
+	// Check sufficiency for the generated airway MST.
 	if ((airportsWereUsed) && (airwayMstEdgeCount == vertices)) {
 		validAirwayMst = true;
 	} else if ((!airportsWereUsed) && (airwayMstEdgeCount == vertices - 1)) {
