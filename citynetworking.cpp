@@ -41,7 +41,6 @@ int roadNetworkCost = 0; 			//Total weight of the MST (Minimum Spanning Tree).
 int roadMstEdgeCount = 0;
 int roadNetworkRoads = 0; 			//Number of roadsVector in the MST.
 
-bool airportsWereUsed = false;
 bool validRoadMst = false;
 bool validAirwayMst = false;
 
@@ -108,9 +107,10 @@ void outputRoadsMst() {
 ------------------------------------------------------------------------------*/
 class Graph {
 	private:
-		int graphVertices; //Number 
-		int graphMaxAirports;
-		int graphMaxRoads;
+		int graphVertices; //Number of cities of the network.
+		int graphMaxAirports; //Maximum number of airports to be built.
+		int graphMaxRoads; //Maximum number of roads to be built.
+		bool airportsWereUsed;
 		int *predecessor, *predecessorRoads, *rank, *rankRoads;
 		vector<Edge> airwayVector; //Vector that holds all Edges<Connection, cost>.
 		vector<Edge> roadsVector; //Vector that holds only road edges.
@@ -121,6 +121,7 @@ class Graph {
 			this->graphMaxAirports = 0;
 			this->graphMaxRoads = 0;
 			skyCity = vertices + 1;
+			airportsWereUsed = false;
 		}
 		~Graph() {
 			delete[] this->predecessor;
@@ -129,6 +130,8 @@ class Graph {
 			delete[] this->rankRoads;
 		}
 
+		//Getters.
+		bool getWereAirportsBuilt() { return airportsWereUsed; }
 		//Setters.
 		void setMaxAirports(int i) { graphMaxAirports = i; }
 		void setMaxRoads(int i) { graphMaxRoads = i; }
@@ -303,8 +306,9 @@ int main() {
 	if (roadMstEdgeCount == vertices - 1) { validRoadMst = true; }
 
 	//Checks if the road and airways MST is sufficient.
-	if ((airportsWereUsed) && (airwayMstEdgeCount == vertices)) { validAirwayMst = true; }
-	else if ((!airportsWereUsed) && (airwayMstEdgeCount == vertices - 1)) { validAirwayMst = true; }
+	bool airWereUsed = graph.getWereAirportsBuilt();
+	if ((airWereUsed) && (airwayMstEdgeCount == vertices)) { validAirwayMst = true; }
+	else if ((!airWereUsed) && (airwayMstEdgeCount == vertices - 1)) { validAirwayMst = true; }
 
 	//If the input given can't be modeled in to a connected graph.
 	if (!validAirwayMst && !validRoadMst) { cout << "Insuficiente" << endl; }
