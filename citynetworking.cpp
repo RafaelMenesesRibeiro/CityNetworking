@@ -32,12 +32,12 @@ int skyCityCost = 0;
 int airwayMstEdgeCount = 0;
 // Output variables.
 int airwayNetworkCost = 0; 			// Total weight of the MST (Minimum Spanning Tree).
-int airwayNetworkRoads = 0; 		// Number of roads in the MST.
+int airwayNetworkRoads = 0; 		// Number of roadsVector in the MST.
 int airwayNetworkAirports = 0; 	// Number of airports in the MST.
 
 int roadMstEdgeCount = 0;
 int roadNetworkCost = 0; 		// Total weight of the MST (Minimum Spanning Tree).
-int roadNetworkRoads = 0; 		// Number of roads in the MST.
+int roadNetworkRoads = 0; 		// Number of roadsVector in the MST.
 
 bool airportsWereUsed = false;
 bool validRoadMst = false;
@@ -108,21 +108,21 @@ void outputRoads() {
 class Graph {
 	private:
 		int cities;
-		int maxAirports;
-		int maxRoads;
+		int airports;
+		int roads;
 		int *predecessor;
 		int *predecessorRoads;
 		int *rank;
 		int *rankRoads;
 		// Vector holds all concrete Edges<Connection, cost> in this graph.
-		vector<Edge> edgeVector;
-		vector<Edge> roads;
+		vector<Edge> airwayVector;
+		vector<Edge> roadsVector;
 
 	public:
 		Graph(int vertices) {
 			this->cities = vertices;
-			this->maxAirports = 0;
-			this->maxRoads = 0;
+			this->airports = 0;
+			this->roads = 0;
 		}
 
 		~Graph() {
@@ -132,12 +132,12 @@ class Graph {
 
 		// Getters.
 		int getCities() { return cities; }
-		int getMaxAirports() { return maxAirports; }
-		int getMaxRoads() { return maxRoads; }
+		int getMaxAirports() { return airports; }
+		int getMaxRoads() { return roads; }
 
 		// Setters.
-		void setMaxAirports(int i) { maxAirports = i; }
-		void setMaxRoads(int i) { maxRoads = i; }
+		void setMaxAirports(int i) { airports = i; }
+		void setMaxRoads(int i) { roads = i; }
 
 		// Edge methods
 		/** Creates a new edge, <connection, cost>. */
@@ -149,10 +149,10 @@ class Graph {
 
 		/** Adds the new adge to the graph.*/
 		void addEdge(Edge e) {
-			edgeVector.push_back(e);
+			airwayVector.push_back(e);
 		}
 		void addRoad (Edge e) {
-			roads.push_back(e);
+			roadsVector.push_back(e);
 		}
 
 		/** Prints to standard output the information of the given edge. */
@@ -168,18 +168,18 @@ class Graph {
 		void printEdgeList() {
 			cout << endl << "graph.printEdgeList()" << endl;
 			vector<Edge>::const_iterator ci;
-			for (ci = edgeVector.begin(); ci != edgeVector.end(); ci++) {
+			for (ci = airwayVector.begin(); ci != airwayVector.end(); ci++) {
 				printEdge(*ci);
 			}
 		}
 
-		/** Sorts the concrete edges in this graphs edgeVector */
+		/** Sorts the concrete edges in this graphs airwayVector */
 		void sortEdges() {
-			sort(edgeVector.begin(), edgeVector.end(), edgeWeightComparator);
+			sort(airwayVector.begin(), airwayVector.end(), edgeWeightComparator);
 		}
 
 		void sortRoads() {
-			sort(roads.begin(), roads.end(), edgeWeightComparator);
+			sort(roadsVector.begin(), roadsVector.end(), edgeWeightComparator);
 		}
 
 		/** Calculates the MST for this graph, generating the desired network. */
@@ -189,14 +189,14 @@ class Graph {
 			sortEdges();
 
 			vector<Edge>::const_iterator it;
-			for (it = edgeVector.begin(); it != edgeVector.end(); it++) {
+			for (it = airwayVector.begin(); it != airwayVector.end(); it++) {
 				u = (*it).first.first;
 				v = (*it).first.second;
 				setU = findSet(u);
 				setV = findSet(v);
 				if (setU != setV) {
 					if (v == skyCity) {
-						if (maxAirports > 1) {
+						if (airports > 1) {
 							airwayNetworkAirports++;
 							airportsWereUsed = true;
 							airwayNetworkCost += (*it).second;
@@ -259,7 +259,7 @@ class Graph {
 			sortRoads();
 
 			vector<Edge>::const_iterator it;
-			for (it = roads.begin(); it != roads.end(); it++) {
+			for (it = roadsVector.begin(); it != roadsVector.end(); it++) {
 				u = (*it).first.first;
 				v = (*it).first.second;
 				setU = findSetRoads(u);
@@ -326,7 +326,7 @@ int main() {
 	skyCity = vertices + 1;
 	Graph graph(vertices);
 
-	// Gets the max number of airports (maxAirports).
+	// Gets the max number of airports (airports).
 	cin >> aux;
 	graph.setMaxAirports(aux);
 
@@ -337,11 +337,11 @@ int main() {
 		graph.addEdge(e);
 	}
 
-	// Gets the max number of roads (maxRoads).
+	// Gets the max number of roadsVector (roads).
 	cin >> aux;
 	graph.setMaxRoads(aux);
 
-	// Creates all the roads connecting city a to city b, if a and b aren't the same
+	// Creates all the roadsVector connecting city a to city b, if a and b aren't the same
 	for (i = 0; i < aux; i++) {
 		cin >> a >> b >> c;
 		if (a != b) {
