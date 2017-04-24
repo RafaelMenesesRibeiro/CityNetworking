@@ -31,18 +31,15 @@ using std::pair;
 ------------------------------------------------------------------------------*/
 int skyCity; //Abstract city to which all cities with airports connect to.
 
-int airwayMstEdgeCount = 0; //Counts how many edges MST obtains during execution.
+int fullMSTEdgeCount = 0; //Counts how many edges MST obtains during execution.
+int roadMSTEdgeCount = 0;
 //Output variables.
-int airwayNetworkCost = 0; 			//Total weight of the MST (Minimum Spanning Tree).
-int airwayNetworkRoads = 0; 		//Number of roadsVector in the MST.
-int airwayNetworkAirports = 0; 		//Number of airports in the MST.
+int fullNetworkCost = 0; 			//Total weight of the MST (Minimum Spanning Tree).
+int fullNetworkRoadsCount = 0; 		//Number of roadsVector in the MST.
+int fullNetworkAirportsCount = 0; 	//Number of airports in the MST.
+int roadNetworkCost = 0; 			//Total weight of the MST with road edges only.
+int roadNetworkRoadsCount = 0; 		//Number of roadsVector in the MST with road edges only.
 
-int roadNetworkCost = 0; 			//Total weight of the MST (Minimum Spanning Tree).
-int roadMstEdgeCount = 0;
-int roadNetworkRoads = 0; 			//Number of roadsVector in the MST.
-
-bool validRoadMst = false;
-bool validAirwayMst = false;
 
 /*------------------------------------------------------------------------------
 			
@@ -90,13 +87,13 @@ bool edgeWeightComparator(const Edge& edge1, const Edge& edge2) {
 
 //Outputs the result.
 void outputAirwayMst() {
-	cout << airwayNetworkCost << endl;
-	cout << airwayNetworkAirports << " " << airwayNetworkRoads << endl;
+	cout << fullNetworkCost << endl;
+	cout << fullNetworkAirportsCount << " " << fullNetworkRoadsCount << endl;
 }
 //Outputs the result.
 void outputRoadsMst() {
 	cout << roadNetworkCost << endl;
-	cout << "0" << " " << roadNetworkRoads << endl;
+	cout << "0" << " " << roadNetworkRoadsCount << endl;
 }
 
 
@@ -194,7 +191,7 @@ class Graph {
 			if (rankRoads[u] > rankRoads[v]) { predecessorRoads[v] = u; }
 			else { predecessorRoads[u] = v; }
 			if(rankRoads[u] == rankRoads[v]) { (rankRoads[v])++; }
-			roadMstEdgeCount++;
+			roadMSTEdgeCount++;
 		}
 
 		//If the vertices don't belong to the same set, unites them.
@@ -204,7 +201,7 @@ class Graph {
 			if (rank[u] > rank[v]) { predecessor[v] = u; }
 			else { predecessor[u] = v; }
 			if (rank[u] == rank[v]) { (rank[v])++; }
-			airwayMstEdgeCount++;
+			fullMSTEdgeCount++;
 		}
 
 		//Calculates the MST (Minimum Spanning Tree) using only the road edges.
@@ -219,7 +216,7 @@ class Graph {
 				setU = roadsFindSet(u);
 				setV = roadsFindSet(v);
 				if (setU != setV) { //If the nodes weren't already in the same tree.
-					roadNetworkRoads++; //Increments the roads to build counter.
+					roadNetworkRoadsCount++; //Increments the roads to build counter.
 					roadNetworkCost += (*it).second; //Increments the cost of the network.
 					roadsUniteSet(setU, setV); //Unites the vertices.
 				}
@@ -240,24 +237,24 @@ class Graph {
 				if (setU != setV) { //If the nodes weren't already in the same tree.
 					if (v == skyCity) { //If the edge is an airway.
 						if (graphMaxAirports > 1) { //If there is more than on airway.
-							airwayNetworkAirports++; //Increments the airports to build counter.
+							fullNetworkAirportsCount++; //Increments the airports to build counter.
 							airportsWereUsed = true; //Flags that airports were built.
-							airwayNetworkCost += (*it).second; //Increments the cost of the network.
+							fullNetworkCost += (*it).second; //Increments the cost of the network.
 							airwaysUniteSet(setU, setV); //Unites the vertices.
 							skyCityCost = (*it).second;
 						}
 					}
 					else { //If the edge is a road edge.
-						airwayNetworkRoads++; //Increments the roads to build counter.
-						airwayNetworkCost += (*it).second; //Increments the cost of the network.
+						fullNetworkRoadsCount++; //Increments the roads to build counter.
+						fullNetworkCost += (*it).second; //Increments the cost of the network.
 						airwaysUniteSet(setU, setV); //Unites the vertices.
 					}
 				}
 			}
 
-			if (airwayNetworkAirports == 1) { //If only one airport is to be built.
-				airwayNetworkAirports = 0; //Removes the airport from the network.
-				airwayNetworkCost -= skyCityCost; //Decrements the cost of the network.
+			if (fullNetworkAirportsCount == 1) { //If only one airport is to be built.
+				fullNetworkAirportsCount = 0; //Removes the airport from the network.
+				fullNetworkCost -= skyCityCost; //Decrements the cost of the network.
 				airportsWereUsed = false; //Flags that airports weren't built.
 			}
 		}
@@ -274,6 +271,8 @@ int main() {
 		//int:a, int:b		represent the cities of the connection
 		//int:c				represents the cost of the connection.
 	int aux, a, b, c, i, vertices;
+	bool validRoadMst = false;
+	bool validAirwayMst = false;
 	Edge e; //Edge (auxiliar).
 
 	
@@ -303,12 +302,11 @@ int main() {
 	graph.airwaysKruskalMST(); //Runs Kruskal's algorithm to find the MST, road edges and airways.
 
 	//Checks if the road MST is sufficient.
-	if (roadMstEdgeCount == vertices - 1) { validRoadMst = true; }
-
+	if (roadMSTEdgeCount == vertices - 1) { validRoadMst = true; }
 	//Checks if the road and airways MST is sufficient.
 	bool airWereUsed = graph.getWereAirportsBuilt();
-	if ((airWereUsed) && (airwayMstEdgeCount == vertices)) { validAirwayMst = true; }
-	else if ((!airWereUsed) && (airwayMstEdgeCount == vertices - 1)) { validAirwayMst = true; }
+	if ((airWereUsed) && (fullMSTEdgeCount == vertices)) { validAirwayMst = true; }
+	else if ((!airWereUsed) && (fullMSTEdgeCount == vertices - 1)) { validAirwayMst = true; }
 
 	//If the input given can't be modeled in to a connected graph.
 	if (!validAirwayMst && !validRoadMst) { cout << "Insuficiente" << endl; }
@@ -316,9 +314,9 @@ int main() {
 	else if (validAirwayMst && !validRoadMst) { outputAirwayMst(); }
 	else if (validAirwayMst && validRoadMst) { //If both MSTs are suficient
 			//If the MST with only road edges is cheaper or the same price to build. Prioritizes less airports.
-			if (roadNetworkCost <= airwayNetworkCost) { outputRoadsMst(); }
+			if (roadNetworkCost <= fullNetworkCost) { outputRoadsMst(); }
 			//If the MST with only road edges is more expensive than the MST with both road edges and airways.
-			else if (roadNetworkCost < airwayNetworkCost) { outputAirwayMst(); }
+			else if (roadNetworkCost < fullNetworkCost) { outputAirwayMst(); }
 	}
 	return 0;
 }
