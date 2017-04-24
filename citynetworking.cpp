@@ -282,8 +282,8 @@ class Graph {
 
 		/** Initializes one set each with one vertex equal to skyCity int value. */
 		void makeSetRoads() {
-			parentRoads = new int[getMaxRoads()];
-			rankRoads = new int[getMaxRoads()];
+			parentRoads = new int[getMaxRoads()+1];
+			rankRoads = new int[getMaxRoads()+1];
 			for (int i = 0; i <= getMaxRoads(); i++) {
 				rankRoads[i] = 0;
 				parentRoads[i] = i;
