@@ -1,0 +1,48 @@
+outputs:
+	Insuficiente
+
+	ou
+
+	Custo
+	Aeroportos Estradas
+
+t1.in:
+5
+2 2
+
+t2.in:
+Insuficiente
+
+t3.in:
+14
+3 1
+
+t4.in:
+5
+0 3
+
+t5.in:
+10
+0 10
+
+t6.in:
+11
+2 9
+
+t7.in:
+10
+0 10
+
+t8.in:
+11
+2 9
+
+// A ordem do vector NAO DEVE ser alterada
+t9.in:
+3
+0 3
+
+// A ordem do vector DEVE ser alterada. Aeroporto deve aparecer em ultimo lugar.
+t10.in:
+3
+0 3
