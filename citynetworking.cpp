@@ -39,6 +39,8 @@ int networkRoads = 0; 		// Number of roads in the MST.
 int networkAirports = 0; 	// Number of airports in the MST.
 
 bool setsWereCreated = false;
+bool airportsWereUsed = false;
+
 /*------------------------------------------------------------------------------
 
 			STRUCTS
@@ -138,24 +140,6 @@ class Graph {
 		void setMaxAirports(int i) { networkMaxAirports = i; }
 		void setMaxRoads(int i) { networkMaxRoads = i; }
 
-		/**
-		* Checks if the vertex has connections
-		* Returns true if the recieved vertex(city) is connected to some other city.
-		*/
-		/*
-		bool vertexIsConnected(int city) {
-			vector<Edge>::const_iterator it;
-			for (it = edgeVector.begin(); it != edgeVector.end(); it++) {
-				Connection connection = (*it).first;
-				int cityA = connection.first;
-				int cityB = connection.second;
-				if (cityA == city || cityB == city)
-					return true;
-			}
-			return false;
-		}
-		*/
-
 		// Edge methods
 		/** Creates a new edge, <connection, cost>. */
 		Edge newEdge(int a, int b, int c) {
@@ -204,14 +188,19 @@ class Graph {
 				setU = findSet(u);
 				setV = findSet(v);
 				if (setU != setV) {
-					//cout << u << " - " << v << endl;
-					if (v == skyCity)
-						networkAirports++;
-					else
+					if (v == skyCity) {
+						if (networkMaxAirports > 1) {
+							networkAirports++;
+							airportsWereUsed = true;
+							networkCost += (*it).second;
+							uniteSet(setU, setV);
+						}
+					}
+					else {
 						networkRoads++;
-					networkCost += (*it).second;
-					uniteSet(setU, setV);
-					mstEdges++;
+						networkCost += (*it).second;
+						uniteSet(setU, setV);
+					}
 				}
 			}
 		}
@@ -238,6 +227,7 @@ class Graph {
 
 		/** If u and v don't belong to the same set, unite them into the growing MST */
 		void uniteSet(int u, int v) {
+
 			u = findSet(u);
 			v = findSet(v);
 
@@ -248,6 +238,8 @@ class Graph {
 
 			if(rank[u] == rank[v])
 				(rank[v])++;
+
+			mstEdges++;
 		}
 	};
 
@@ -299,12 +291,18 @@ int main() {
 	// Runs Kruskal's algorithm to find the MST.
 	graph.kruskalMST();
 
-	if (mstEdges < skyCity - 2) {
-		cout << "Insuficiente" << endl;
-		return 0;
-	}
+	int graphVertices = graph.getGraphVertices();
 
 	// Prints the answer.
-	outputMST();
+	if ((airportsWereUsed) && (mstEdges == graphVertices)) {
+		outputMST();
+	}
+	else if ((!airportsWereUsed) && (mstEdges == graphVertices - 1)) {
+		outputMST();
+	}
+	else {
+		cout << "Insuficiente" << endl;
+	}
+
 	return 0;
 }
