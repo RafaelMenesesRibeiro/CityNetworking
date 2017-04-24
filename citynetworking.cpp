@@ -27,6 +27,8 @@ using std::pair;
 ------------------------------------------------------------------------------*/
 // Abstract city to which all cities with airports connect to.
 int skyCity;
+int skyCityCost = 0;
+
 // Counts how many edges MST obtains during execution.
 int mstEdges = 0;
 // Output variables.
@@ -35,7 +37,7 @@ int networkRoads = 0; 		// Number of roads in the MST.
 int networkAirports = 0; 	// Number of airports in the MST.
 
 int mstEdges2 = 0;
-int networkCost2 = 0; 			// Total weight of the MST (Minimum Spanning Tree).
+int networkCost2 = 0; 		// Total weight of the MST (Minimum Spanning Tree).
 int networkRoads2 = 0; 		// Number of roads in the MST.
 
 bool setsWereCreated = false;
@@ -82,14 +84,12 @@ bool airwayComparator(Edge edge1, Edge edge2) {
 bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
 	if (edge.second < anotherEdge.second)
     	return true;
-  	else if (edge.second == anotherEdge.second) {
+  else if (edge.second == anotherEdge.second) {
 		if (airwayComparator(edge, anotherEdge)) {
 			return true;
 		}
  	}
-	else
-  		return false;
-  	return false;
+	return false;
 }
 
 /** Prints the output when a proper newtwork is created. */
@@ -205,6 +205,9 @@ class Graph {
 							airportsWereUsed = true;
 							networkCost += (*it).second;
 							uniteSet(setU, setV);
+							if (skyCityCost == 0) {
+								skyCityCost = (*it).second;
+							}
 						}
 					}
 					else {
@@ -213,6 +216,11 @@ class Graph {
 						uniteSet(setU, setV);
 					}
 				}
+			}
+
+			if (networkAirports == 1) {
+				networkAirports = 0;
+				networkCost -= skyCityCost; 
 			}
 		}
 
