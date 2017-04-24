@@ -74,115 +74,107 @@ bool airwayComparator(Edge edge1, Edge edge2) {
 
 
 //Comparator used for sorting the vector of concrete edges with vector::sort
+//Prioritizes roads over airways.
 //Returns true (sort) if:
 	// - edge1 has a smaller weight is lighter.
 	// - both have the same weight but edge1 isn't an airway and edge2 is.
 bool edgeWeightComparator(const Edge& edge1, const Edge& edge2) {
-	if (edge1.second < edge2.second)
-    	return true;
-  else if (edge1.second == edge2.second) {
-		if (airwayComparator(edge1, edge2)) {
-			return true;
-		}
+	//If edge1 has a smaller weight.
+	if (edge1.second < edge2.second) { return true;	}
+  	//If both edges have the same weight.
+  	else if (edge1.second == edge2.second) {
+  		//If edge1 isn't an airway but edge2 is.
+		if (airwayComparator(edge1, edge2)) { return true; }
  	}
 	return false;
 }
 
-/** Prints the output when a proper newtwork is created. */
+//Outputs the result.
 void outputAirwayMst() {
 	cout << airwayNetworkCost << endl;
 	cout << airwayNetworkAirports << " " << airwayNetworkRoads << endl;
 }
+//Outputs the result.
 void outputRoadsMst() {
 	cout << roadNetworkCost << endl;
 	cout << "0" << " " << roadNetworkRoads << endl;
 }
 
+
 /*------------------------------------------------------------------------------
+
 			CLASSES
+
 ------------------------------------------------------------------------------*/
 class Graph {
 	private:
-		int cities;
-		int airports;
-		int roads;
-		int *predecessor;
-		int *predecessorRoads;
-		int *rank;
-		int *rankRoads;
-		//Vector holds all concrete Edges<Connection, cost> in this graph.
-		vector<Edge> airwayVector;
-		vector<Edge> roadsVector;
+		int graphVertices; //Number 
+		int graphMaxAirports;
+		int graphMaxRoads;
+		int *predecessor, *predecessorRoads, *rank, *rankRoads;
+		vector<Edge> airwayVector; //Vector that holds all Edges<Connection, cost>.
+		vector<Edge> roadsVector; //Vector that holds only road edges.
 
 	public:
 		Graph(int vertices) {
-			this->cities = vertices;
-			this->airports = 0;
-			this->roads = 0;
+			this->graphVertices = vertices;
+			this->graphMaxAirports = 0;
+			this->graphMaxRoads = 0;
+			skyCity = vertices + 1;
 		}
-
 		~Graph() {
 			delete[] this->predecessor;
+			delete[] this->predecessorRoads;
 			delete[] this->rank;
+			delete[] this->rankRoads;
 		}
 
 		//Setters.
-		void setMaxAirports(int i) { airports = i; }
-		void setMaxRoads(int i) { roads = i; }
+		void setMaxAirports(int i) { graphMaxAirports = i; }
+		void setMaxRoads(int i) { graphMaxRoads = i; }
 
-		//Edge methods
-		/** Creates a new edge, <connection, cost>. */
+		//Creates a new Edge<connection, cost>.
 		Edge newEdge(int a, int b, int c) {
 			Connection con = make_pair(a, b);
 			Edge e = make_pair(con, c);
 			return e;
 		}
 
-		/** Adds the new adge to the graph.*/
-		void addEdge(Edge e) {
-			airwayVector.push_back(e);
-		}
-		void addRoad (Edge e) {
-			roadsVector.push_back(e);
-		}
+		//Adds an edge to the network.
+		void addEdge(Edge e) { airwayVector.push_back(e); }
+		//Adds a road to the road vector.
+		void addRoad (Edge e) { roadsVector.push_back(e); }
 
-		/** Sorts the concrete edges in this graphs airwayVector */
-		void airwaysSort() {
-			sort(airwayVector.begin(), airwayVector.end(), edgeWeightComparator);
-		}
+		//Sorts all the edges in the network in nondecrescing order by edge weight.
+		void airwaysSort() { sort(airwayVector.begin(), airwayVector.end(), edgeWeightComparator); }
+		//Sorts the road edges in the road vector in nondecrescing order by edge weight.
+		void roadsSort() { sort(roadsVector.begin(), roadsVector.end(), edgeWeightComparator); }
 
-		void roadsSort() {
-			sort(roadsVector.begin(), roadsVector.end(), edgeWeightComparator);
-		}
 
+		//Recursively finds the root of the tree the given node belongs to.
 		int roadsFindSet(int u) {
-			if (u != predecessorRoads[u]) {
-				int i = predecessorRoads[u];
-				predecessorRoads[u] = roadsFindSet(i);
-			}
+			//If the vertex isn't the root of the tree.
+			if (u != predecessorRoads[u]) { predecessorRoads[u] = roadsFindSet(predecessorRoads[u]); }
 			return predecessorRoads[u];
 		}
 
-		/** Finds the set to which given vertex(city) belongs to */
+		//Recursively finds the root of the tree the given node belongs to.
 		int airwaysFindSet(int u) {
-			if (u != predecessor[u]) {
-				int i = predecessor[u];
-				predecessor[u] = airwaysFindSet(i);
-			}
+			if (u != predecessor[u]) { predecessor[u] = airwaysFindSet(predecessor[u]); }
 			return predecessor[u];
 		}
 
-		/** Initializes one set each with one vertex equal to roads int value. */
+		//Makes a set for each road.
 		void roadsMakeSet() {
-			predecessorRoads = new int[roads];
-			rankRoads = new int[roads];
-			for (int i = 0; i <= roads; i++) {
+			predecessorRoads = new int[graphMaxRoads];
+			rankRoads = new int[graphMaxRoads];
+			for (int i = 0; i <= graphMaxRoads; i++) {
 				rankRoads[i] = 0;
 				predecessorRoads[i] = i;
 			}
 		}
 
-		/** Initializes one set each with one vertex equal to skyCity int value. */
+		//Makes a set for each vertex.
 		void airwaysMakeSet() {
 			predecessor = new int[skyCity];
 			rank = new int[skyCity];
@@ -192,138 +184,110 @@ class Graph {
 			}
 		}
 
-		/** If u and v don't belong to the same set, unite them into the growing MST */
+		//If the vertices don't belong to the same set, unites them.
 		void roadsUniteSet(int u, int v) {
-
 			u = roadsFindSet(u);
 			v = roadsFindSet(v);
-
-			if (rankRoads[u] > rankRoads[v])
-				predecessorRoads[v] = u;
-			else
-				predecessorRoads[u] = v;
-
-			if(rankRoads[u] == rankRoads[v])
-				(rankRoads[v])++;
-
+			if (rankRoads[u] > rankRoads[v]) { predecessorRoads[v] = u; }
+			else { predecessorRoads[u] = v; }
+			if(rankRoads[u] == rankRoads[v]) { (rankRoads[v])++; }
 			roadMstEdgeCount++;
 		}
 
-		/** If u and v don't belong to the same set, unite them into the growing MST */
+		//If the vertices don't belong to the same set, unites them.
 		void airwaysUniteSet(int u, int v) {
 			u = airwaysFindSet(u);
 			v = airwaysFindSet(v);
-			if (rank[u] > rank[v])
-				predecessor[v] = u;
-			else
-				predecessor[u] = v;
-			if (rank[u] == rank[v])
-				(rank[v])++;
+			if (rank[u] > rank[v]) { predecessor[v] = u; }
+			else { predecessor[u] = v; }
+			if (rank[u] == rank[v]) { (rank[v])++; }
 			airwayMstEdgeCount++;
 		}
 
-		/**
-		* Calculates the MST for this graph, generating the desired network using
-		* only roads.
-		*/
+		//Calculates the MST (Minimum Spanning Tree) using only the road edges.
 		void roadsKruskalMST() {
 			int u, v, setU, setV;
-			roadsMakeSet();
-			roadsSort();
-
+			roadsMakeSet(); //Makes a set out of each vertex.
+			roadsSort(); //Sorts the road edges by nondecrescing weight.
 			vector<Edge>::const_iterator it;
 			for (it = roadsVector.begin(); it != roadsVector.end(); it++) {
 				u = (*it).first.first;
 				v = (*it).first.second;
 				setU = roadsFindSet(u);
 				setV = roadsFindSet(v);
-				if (setU != setV) {
-					roadNetworkRoads++;
-					roadNetworkCost += (*it).second;
-					roadsUniteSet(setU, setV);
+				if (setU != setV) { //If the nodes weren't already in the same tree.
+					roadNetworkRoads++; //Increments the roads to build counter.
+					roadNetworkCost += (*it).second; //Increments the cost of the network.
+					roadsUniteSet(setU, setV); //Unites the vertices.
 				}
 			}
 		}
 
-		/**
-		* Calculates the MST for this graph, generating the desired network using
-		* both roads and airways.
-		*/
+		//Calculates the MST (Minimum Spanning Tree) using road edges and airways.
 		void airwaysKruskalMST() {
-			int u, v, setU, setV;
-			int skyCityCost = 0;
-			airwaysMakeSet();
-			airwaysSort();
-
+			int u, v, setU, setV, skyCityCost = 0;
+			airwaysMakeSet(); //Makes a set out of each vertex.
+			airwaysSort(); //Sorts all the edges by nondecrescing weight.
 			vector<Edge>::const_iterator it;
 			for (it = airwayVector.begin(); it != airwayVector.end(); it++) {
 				u = (*it).first.first;
 				v = (*it).first.second;
 				setU = airwaysFindSet(u);
 				setV = airwaysFindSet(v);
-				if (setU != setV) {
-					if (v == skyCity) {
-						if (airports > 1) {
-							airwayNetworkAirports++;
-							airportsWereUsed = true;
-							airwayNetworkCost += (*it).second;
-							airwaysUniteSet(setU, setV);
-							if (skyCityCost == 0) {
-								skyCityCost = (*it).second;
-							}
+				if (setU != setV) { //If the nodes weren't already in the same tree.
+					if (v == skyCity) { //If the edge is an airway.
+						if (graphMaxAirports > 1) { //If there is more than on airway.
+							airwayNetworkAirports++; //Increments the airports to build counter.
+							airportsWereUsed = true; //Flags that airports were built.
+							airwayNetworkCost += (*it).second; //Increments the cost of the network.
+							airwaysUniteSet(setU, setV); //Unites the vertices.
+							skyCityCost = (*it).second;
 						}
 					}
-					else {
-						airwayNetworkRoads++;
-						airwayNetworkCost += (*it).second;
-						airwaysUniteSet(setU, setV);
+					else { //If the edge is a road edge.
+						airwayNetworkRoads++; //Increments the roads to build counter.
+						airwayNetworkCost += (*it).second; //Increments the cost of the network.
+						airwaysUniteSet(setU, setV); //Unites the vertices.
 					}
 				}
 			}
 
-			if (airwayNetworkAirports == 1) {
-				airwayNetworkAirports = 0;
-				airwayNetworkCost -= skyCityCost;
-				airportsWereUsed = false;
+			if (airwayNetworkAirports == 1) { //If only one airport is to be built.
+				airwayNetworkAirports = 0; //Removes the airport from the network.
+				airwayNetworkCost -= skyCityCost; //Decrements the cost of the network.
+				airportsWereUsed = false; //Flags that airports weren't built.
 			}
 		}
 	};
 
 /*------------------------------------------------------------------------------
+			
 			Application
+
 ------------------------------------------------------------------------------*/
 int main() {
-	/**
-	* Input variables.
-	* int:aux variable is used to fetch the numbers such as number of cities, etc.
-	* int:a, int:b are both cities, representing two cities.
-	* int:c represents the cost of building an airport on city a or a road between a and b.
-	*/
+	//Input variables.
+		//int:aux			used to fetch input numbers.
+		//int:a, int:b		represent the cities of the connection
+		//int:c				represents the cost of the connection.
 	int aux, a, b, c, i, vertices;
 	Edge e; //Edge (auxiliar).
 
-	//Gets the number of cities (graph vertices) meant to be connected.
-	cin >> vertices;
-	skyCity = vertices + 1;
-	Graph graph(vertices);
+	
+	cin >> vertices; //Gets the number of cities (graph vertices) meant to be connected.
+	Graph graph(vertices); //Constructs the graph.
 
-	//Gets the max number of airports (airports).
-	cin >> aux;
+	cin >> aux; //Gets the max number of airports (graphMaxAirports).
 	graph.setMaxAirports(aux);
-
-	//Creates all the airways, connecting all cities with airports to skyCity.
-	for (i = 0; i < aux; i++) {
+	for (i = 0; i < aux; i++) { //Creates all the airways, connecting all cities with airports to skyCity.
 		cin >> a >> c;
 		e = graph.newEdge(a, skyCity, c);
 		graph.addEdge(e);
 	}
 
-	//Gets the max number of roadsVector (roads).
-	cin >> aux;
+	cin >> aux; //Gets the max number of roads (graphMaxRoads).
 	graph.setMaxRoads(aux);
-
-	//Creates all the roadsVector connecting city a to city b, if a and b aren't the same
-	for (i = 0; i < aux; i++) {
+	for (i = 0; i < aux; i++) { //Creates all the roadsVector connecting city a to city b, if a and b aren't the same.
 		cin >> a >> b >> c;
 		if (a != b) {
 			e = graph.newEdge(a, b, c);
@@ -332,36 +296,25 @@ int main() {
 		}
 	}
 
-	//Runs Kruskal's algorithms to find the MST.
-	graph.roadsKruskalMST();
-	graph.airwaysKruskalMST();
+	graph.roadsKruskalMST(); //Runs Kruskal's algorithm to find the MST, only using road edges.
+	graph.airwaysKruskalMST(); //Runs Kruskal's algorithm to find the MST, road edges and airways.
 
-	//Check sufficiency for the generated road MST.
-	if (roadMstEdgeCount == vertices - 1) {
-		validRoadMst = true;
+	//Checks if the road MST is sufficient.
+	if (roadMstEdgeCount == vertices - 1) { validRoadMst = true; }
+
+	//Checks if the road and airways MST is sufficient.
+	if ((airportsWereUsed) && (airwayMstEdgeCount == vertices)) { validAirwayMst = true; }
+	else if ((!airportsWereUsed) && (airwayMstEdgeCount == vertices - 1)) { validAirwayMst = true; }
+
+	//If the input given can't be modeled in to a connected graph.
+	if (!validAirwayMst && !validRoadMst) { cout << "Insuficiente" << endl; }
+	else if (!validAirwayMst && validRoadMst) { outputRoadsMst(); }
+	else if (validAirwayMst && !validRoadMst) { outputAirwayMst(); }
+	else if (validAirwayMst && validRoadMst) { //If both MSTs are suficient
+			//If the MST with only road edges is cheaper or the same price to build. Prioritizes less airports.
+			if (roadNetworkCost <= airwayNetworkCost) { outputRoadsMst(); }
+			//If the MST with only road edges is more expensive than the MST with both road edges and airways.
+			else if (roadNetworkCost < airwayNetworkCost) { outputAirwayMst(); }
 	}
-
-	//Check sufficiency for the generated airway MST.
-	if ((airportsWereUsed) && (airwayMstEdgeCount == vertices)) {
-		validAirwayMst = true;
-	} else if ((!airportsWereUsed) && (airwayMstEdgeCount == vertices - 1)) {
-		validAirwayMst = true;
-	}
-
-	//Print the proper output.
-	if (!validAirwayMst && !validRoadMst) {
-		cout << "Insuficiente" << endl;
-	} else if (!validAirwayMst && validRoadMst) {
-			outputRoadsMst();
-	} else if (validAirwayMst && !validRoadMst) {
-			outputAirwayMst();
-	}	else if (validAirwayMst && validRoadMst) {
-			if (airwayNetworkCost < roadNetworkCost) {
-				outputAirwayMst();
-			} else if (roadNetworkCost <= airwayNetworkCost) {
-					outputRoadsMst();
-			}
-	}
-
 	return 0;
 }
