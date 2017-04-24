@@ -263,33 +263,33 @@ int main() {
 	* int:a, int:b are both graphVertices, representing two cities.
 	* int:c represents the cost of building an airport on city a or a road between a and b.
 	*/
-	int aux, a, b, c;
-	int i;
-	Edge e; //Edge (auxiliar).
-	int notused = 0;
+	int aux, a, b, c, i;
+	//Edge (auxiliar).
+	Edge e; 
+
 	// Gets the number of vertices (graphVertices) to connect.
-	notused = scanf("%d", &aux);
+	cin >> aux;
 	skyCity = aux + 1;
 	Graph graph(aux);
 
 	// Gets the max number of airports (networkMaxAirports).
-	notused = scanf("%d", &aux);
+	cin >> aux;
 	graph.setMaxAirports(aux);
 
 	// Creates all the airways, connecting all cities with airports to skyCity.
 	for (i = 0; i < aux; i++) {
-		notused = scanf("%d %d", &a, &c);
+		cin >> a >> c;
 		e = graph.newEdge(a, skyCity, c);
 		graph.addEdge(e);
 	}
 
 	// Gets the max number of roads (networkMaxRoads).
-	notused = scanf("%d", &aux);
+	cin >> aux;
 	graph.setMaxRoads(aux);
 
 	// Creates all the roads connecting city a to city b, if a and b aren't the same
 	for (i = 0; i < aux; i++) {
-		notused = scanf("%d %d %d", &a, &b, &c);
+		cin >> a >> b >> c;
 		if (a != b) {
 			e = graph.newEdge(a, b, c);
 			graph.addEdge(e);
@@ -309,8 +309,6 @@ int main() {
 			return 0;
 		}
 	}
-
-	aux = notused;
 
 	// Runs Kruskal's algorithm to find the MST.
 	graph.kruskalMST();
