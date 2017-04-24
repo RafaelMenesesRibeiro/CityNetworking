@@ -34,6 +34,10 @@ int networkCost = 0; 			// Total weight of the MST (Minimum Spanning Tree).
 int networkRoads = 0; 		// Number of roads in the MST.
 int networkAirports = 0; 	// Number of airports in the MST.
 
+int mstEdges2 = 0;
+int networkCost2 = 0; 			// Total weight of the MST (Minimum Spanning Tree).
+int networkRoads2 = 0; 		// Number of roads in the MST.
+
 bool setsWereCreated = false;
 bool airportsWereUsed = false;
 
@@ -93,6 +97,10 @@ void outputMST() {
 	cout << networkCost << endl;
 	cout << networkAirports << " " << networkRoads << endl;
 }
+void outputRoads() {
+	cout << networkCost2 << endl;
+	cout << "0" << " " << networkRoads2 << endl;
+}
 
 /*------------------------------------------------------------------------------
 			CLASSES
@@ -104,8 +112,11 @@ class Graph {
 		int networkMaxRoads;
 		int *parent;
 		int *rank;
+		int *parentRoads;
+		int *rankRoads;
 		// Vector holds all concrete Edges<Connection, cost> in this graph.
 		vector<Edge> edgeVector;
+		vector<Edge> roads;
 
 	public:
 		Graph(int vertices) {
@@ -115,10 +126,12 @@ class Graph {
 		}
 
 		~Graph() {
+			/*
 			if (setsWereCreated) {
 				delete[] this->parent;
 				delete[] this->rank;
 			}
+			*/
 		}
 
 		// Getters.
@@ -141,6 +154,9 @@ class Graph {
 		/** Adds the new adge to the graph.*/
 		void addEdge(Edge e) {
 			edgeVector.push_back(e);
+		}
+		void addRoad (Edge e) {
+			roads.push_back(e);
 		}
 
 		/** Prints to standard output the information of the given edge. */
@@ -165,6 +181,11 @@ class Graph {
 		void sortEdges() {
 			sort(edgeVector.begin(), edgeVector.end(), edgeWeightComparator);
 		}
+
+		void sortRoads() {
+			sort(roads.begin(), roads.end(), edgeWeightComparator);
+		}
+
 		/** Calculates the MST for this graph, generating the desired network. */
 		void kruskalMST() {
 			int u, v, setU, setV;
@@ -231,6 +252,60 @@ class Graph {
 
 			mstEdges++;
 		}
+
+		void kruskalMSTRoads() {
+			int u, v, setU, setV;
+			makeSetRoads();
+			sortRoads();
+
+			vector<Edge>::const_iterator it;
+			for (it = roads.begin(); it != roads.end(); it++) {
+				u = (*it).first.first;
+				v = (*it).first.second;
+				setU = findSetRoads(u);
+				setV = findSetRoads(v);
+				if (setU != setV) {
+					networkRoads2++;
+					networkCost2 += (*it).second;
+					uniteSetRoads(setU, setV);
+				}
+			}
+		}
+
+		int findSetRoads(int u) {
+			if (u != parentRoads[u]) {
+				int i = parentRoads[u];
+				parentRoads[u] = findSetRoads(i);
+			}
+			return parentRoads[u];
+		}
+
+		/** Initializes one set each with one vertex equal to skyCity int value. */
+		void makeSetRoads() {
+			parentRoads = new int[getMaxRoads()];
+			rankRoads = new int[getMaxRoads()];
+			for (int i = 0; i <= getMaxRoads(); i++) {
+				rankRoads[i] = 0;
+				parentRoads[i] = i;
+			}
+		}
+
+		/** If u and v don't belong to the same set, unite them into the growing MST */
+		void uniteSetRoads(int u, int v) {
+
+			u = findSetRoads(u);
+			v = findSetRoads(v);
+
+			if (rankRoads[u] > rankRoads[v])
+				parentRoads[v] = u;
+			else
+				parentRoads[u] = v;
+
+			if(rankRoads[u] == rankRoads[v])
+				(rankRoads[v])++;
+
+			mstEdges2++;
+		}
 	};
 
 /*------------------------------------------------------------------------------
@@ -272,24 +347,59 @@ int main() {
 		cin >> a >> b >> c;
 		if (a != b) {
 			e = graph.newEdge(a, b, c);
+			graph.addRoad(e);
 			graph.addEdge(e);
 		}
 	}
 
 	// Runs Kruskal's algorithm to find the MST.
+
+	graph.kruskalMSTRoads();
+	int cost2 = networkCost2;
+	int suficientcy2 = false;
+
 	graph.kruskalMST();
+	int cost1 = networkCost;
+	int suficientcy1 = false;
 
 	int graphVertices = graph.getGraphVertices();
 
-	// Prints the answer.
-	if ((airportsWereUsed) && (mstEdges == graphVertices)) {
-		outputMST();
-	}
-	else if ((!airportsWereUsed) && (mstEdges == graphVertices - 1)) {
-		outputMST();
+	//Checjks only roads suficientcy
+	if (mstEdges2 == graphVertices - 1) {
+		suficientcy2 = true;
 	}
 	else {
+		suficientcy2 = false;
+	}
+
+	//Checjks roads and airports suficientcy
+	if ((airportsWereUsed) && (mstEdges == graphVertices)) {
+		suficientcy1 = true;
+	}
+	else if ((!airportsWereUsed) && (mstEdges == graphVertices - 1)) {
+		suficientcy1 = true;
+	}
+	else {
+		suficientcy1 = false;
+	}
+
+	if (!suficientcy1 && !suficientcy2) {
 		cout << "Insuficiente" << endl;
+	}
+
+	else if (!suficientcy1 && suficientcy2) {
+		outputRoads();
+	}
+	else if (suficientcy1 && !suficientcy2) {
+		outputMST();
+	}
+	else if (suficientcy1 && suficientcy2) {
+		if (cost1 < cost2) {
+			outputMST();
+		}
+		else if (cost2 <= cost1) {
+			outputRoads();
+		}
 	}
 
 	return 0;
