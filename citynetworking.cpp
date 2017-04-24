@@ -5,7 +5,7 @@
 //Francisco Barros, nº 85069
 //Rafael Ribeiro, nº 84758
 
-//Must be compiled with "g++ -std=c++11 ..."
+//Must be compiled with "g++ -o3 -ansi -Wall -o citynetworking citynetworking.cpp"
 
 #include <stdio.h>
 #include <iostream>
@@ -16,31 +16,29 @@
 #include <utility>
 
 /*------------------------------------------------------------------------------
-
 			CONSTANTS
-
 ------------------------------------------------------------------------------*/
 using namespace std;
 using std::pair;
 
 
 /*------------------------------------------------------------------------------
-
 			GLOBAL VARIABLES
-
 ------------------------------------------------------------------------------*/
 // Abstract city to which all cities with airports connect to.
 int skyCity;
+// Counts how many edges MST obtains during execution.
+int mstEdges = 0;
 // Output variables.
 int networkCost = 0; 			// Total weight of the MST (Minimum Spanning Tree).
 int networkRoads = 0; 		// Number of roads in the MST.
 int networkAirports = 0; 	// Number of airports in the MST.
 
 bool setsWereCreated = false;
+bool airportsWereUsed = false;
+
 /*------------------------------------------------------------------------------
-
 			STRUCTS
-
 ------------------------------------------------------------------------------*/
 // Connection represents a road or airway between city int:a to city int:b.
 typedef pair<int, int> Connection;
@@ -48,9 +46,7 @@ typedef pair<int, int> Connection;
 typedef pair<Connection, int> Edge;
 
 /*------------------------------------------------------------------------------
-
 			AUXILIAR FUNCTIONS
-
 ------------------------------------------------------------------------------*/
 
 /**
@@ -92,11 +88,6 @@ bool edgeWeightComparator(const Edge& edge, const Edge& anotherEdge) {
   	return false;
 }
 
-/** Prints the output in case of impossibility of creating a proper network. */
-void insufficientEdges() {
-	cout << "Insuficiente" << endl;
-}
-
 /** Prints the output when a proper newtwork is created. */
 void outputMST() {
 	cout << networkCost << endl;
@@ -104,9 +95,7 @@ void outputMST() {
 }
 
 /*------------------------------------------------------------------------------
-
 			CLASSES
-
 ------------------------------------------------------------------------------*/
 class Graph {
 	private:
@@ -140,22 +129,6 @@ class Graph {
 		// Setters.
 		void setMaxAirports(int i) { networkMaxAirports = i; }
 		void setMaxRoads(int i) { networkMaxRoads = i; }
-
-		/**
-		* Checks if the vertex has connections
-		* Returns true if the recieved vertex(city) is connected to some other city.
-		*/
-		bool vertexIsConnected(int city) {
-			vector<Edge>::const_iterator it;
-			for (it = edgeVector.begin(); it != edgeVector.end(); it++) {
-				Connection connection = (*it).first;
-				int cityA = connection.first;
-				int cityB = connection.second;
-				if (cityA == city || cityB == city)
-					return true;
-			}
-			return false;
-		}
 
 		// Edge methods
 		/** Creates a new edge, <connection, cost>. */
@@ -205,13 +178,19 @@ class Graph {
 				setU = findSet(u);
 				setV = findSet(v);
 				if (setU != setV) {
-					//cout << u << " - " << v << endl;
-					if (v == skyCity)
-						networkAirports++;
-					else
+					if (v == skyCity) {
+						if (networkMaxAirports > 1) {
+							networkAirports++;
+							airportsWereUsed = true;
+							networkCost += (*it).second;
+							uniteSet(setU, setV);
+						}
+					}
+					else {
 						networkRoads++;
-					networkCost += (*it).second;
-					uniteSet(setU, setV);
+						networkCost += (*it).second;
+						uniteSet(setU, setV);
+					}
 				}
 			}
 		}
@@ -238,6 +217,7 @@ class Graph {
 
 		/** If u and v don't belong to the same set, unite them into the growing MST */
 		void uniteSet(int u, int v) {
+
 			u = findSet(u);
 			v = findSet(v);
 
@@ -248,13 +228,13 @@ class Graph {
 
 			if(rank[u] == rank[v])
 				(rank[v])++;
+
+			mstEdges++;
 		}
 	};
 
 /*------------------------------------------------------------------------------
-
 			Application
-
 ------------------------------------------------------------------------------*/
 int main() {
 	/**
@@ -263,9 +243,9 @@ int main() {
 	* int:a, int:b are both graphVertices, representing two cities.
 	* int:c represents the cost of building an airport on city a or a road between a and b.
 	*/
-	int aux, a, b, c, i;
-	//Edge (auxiliar).
-	Edge e; 
+	int aux, a, b, c;
+	int i;
+	Edge e; //Edge (auxiliar).
 
 	// Gets the number of vertices (graphVertices) to connect.
 	cin >> aux;
@@ -296,24 +276,21 @@ int main() {
 		}
 	}
 
-	// If the number os total connections isn't enough to connect the graph, end with bad output.
-	if (graph.getMaxRoads() + graph.getMaxAirports() < graph.getGraphVertices() - 1) {
-		insufficientEdges();
-		return 0;
-	}
-
-	// Checks if all the vertices have at least one connection, end with bad output.
-	for (i = 1; i <= graph.getGraphVertices(); i++) {
-		if(!graph.vertexIsConnected(i)) {
-			insufficientEdges();
-			return 0;
-		}
-	}
-
 	// Runs Kruskal's algorithm to find the MST.
 	graph.kruskalMST();
 
+	int graphVertices = graph.getGraphVertices();
+
 	// Prints the answer.
-	outputMST();
+	if ((airportsWereUsed) && (mstEdges == graphVertices)) {
+		outputMST();
+	}
+	else if ((!airportsWereUsed) && (mstEdges == graphVertices - 1)) {
+		outputMST();
+	}
+	else {
+		cout << "Insuficiente" << endl;
+	}
+
 	return 0;
 }
