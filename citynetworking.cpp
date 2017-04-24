@@ -225,9 +225,9 @@ class Graph {
 		/** Initializes one set each with one vertex equal to skyCity int value. */
 		void airwaysMakeSet() {
 			airwayPredecessor = new int[skyCity];
-			rank = new int[skyCity];
+			airwayRank = new int[skyCity];
 			for (int i = 0; i <= skyCity; i++) {
-				rank[i] = 0;
+				airwayRank[i] = 0;
 				airwayPredecessor[i] = i;
 			}
 		}
@@ -251,13 +251,13 @@ class Graph {
 		void airwaysUniteSet(int u, int v) {
 			u = airwaysFindSet(u);
 			v = airwaysFindSet(v);
-			if (rank[u] > rank[v]) {
+			if (airwayRank[u] > airwayRank[v]) {
 				airwayPredecessor[v] = u;
 			} else {
 					airwayPredecessor[u] = v;
 			}
-			if (rank[u] == rank[v]) {
-				(rank[v])++;
+			if (airwayRank[u] == airwayRank[v]) {
+				(airwayRank[v])++;
 			}
 			airwayMstEdgeCount++;
 		}
